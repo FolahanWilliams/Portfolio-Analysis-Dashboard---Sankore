@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio Intelligence Dashboard — Foundation Workflow Map</title>
+<style>
+  body {
+    font-family: "Calibri", "Helvetica Neue", Arial, sans-serif;
+    color: #1c2733;
+    font-size: 11pt;
+    line-height: 1.45;
+    margin: 0;
+  }
+  h1 {
+    font-size: 22pt;
+    color: #0f2c4d;
+    margin: 0 0 2px 0;
+  }
+  h2 {
+    font-size: 15pt;
+    color: #0f2c4d;
+    border-bottom: 2px solid #1f6feb;
+    padding-bottom: 4px;
+    margin-top: 26px;
+  }
+  h3 { font-size: 12pt; color: #0f2c4d; margin-bottom: 4px; }
+  .subtitle { color: #5a6b7b; font-size: 11pt; margin: 2px 0 14px 0; }
+  .metabox {
+    background: #f3f7fc;
+    border: 1px solid #d6e2f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 12px 0 4px 0;
+    font-size: 10pt;
+  }
+  .metabox span { display: inline-block; margin-right: 22px; }
+  .metabox b { color: #0f2c4d; }
+  .rule {
+    background: #fff8e6;
+    border-left: 4px solid #e0a800;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-style: italic;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 10px 0 16px 0;
+    font-size: 10pt;
+  }
+  th {
+    background: #0f2c4d;
+    color: #ffffff;
+    text-align: left;
+    padding: 7px 10px;
+    font-weight: 600;
+  }
+  td { border: 1px solid #cdd8e3; padding: 6px 10px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f5f8fb; }
+  code { font-family: "Consolas", monospace; background: #eef2f6; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+  pre {
+    font-family: "Consolas", monospace;
+    background: #0f2c4d;
+    color: #e8eef5;
+    padding: 14px;
+    font-size: 8.5pt;
+    line-height: 1.35;
+    border-radius: 6px;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* ---- Flow diagram (LibreOffice-safe: tables + boxes) ---- */
+  .flow { width: 100%; border-collapse: separate; border-spacing: 0; margin: 8px 0 18px 0; }
+  .flow td { border: none; padding: 0; text-align: center; }
+  .stage {
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 0 auto;
+    width: 92%;
+  }
+  .stage .stitle { font-weight: 700; font-size: 10.5pt; margin-bottom: 4px; }
+  .stage .sbody { font-size: 9pt; line-height: 1.4; }
+  .s1 { background: #e8f0fb; border: 1px solid #bcd3ef; }
+  .s2 { background: #e7f6ee; border: 1px solid #b7e0c8; }
+  .s3 { background: #fdf0e6; border: 1px solid #f0cfae; }
+  .s4 { background: #f0e9f8; border: 1px solid #d3bfe8; }
+  .arrow { font-size: 16pt; color: #1f6feb; padding: 3px 0 !important; }
+  .footer { margin-top: 28px; padding-top: 10px; border-top: 1px solid #cdd8e3; color: #5a6b7b; font-size: 9pt; }
+  .pillrow td { text-align: center; padding: 0 4px; }
+  .pill {
+    display: block; background: #f0e9f8; border: 1px solid #d3bfe8;
+    border-radius: 6px; padding: 8px 6px; font-size: 9pt; font-weight: 600; color: #0f2c4d;
+  }
+</style>
+</head>
+<body>
+
+<h1>Portfolio Intelligence Dashboard</h1>
+<div class="subtitle">Foundation Workflow Map &nbsp;·&nbsp; Week 1 — Foundation</div>
+
+<div class="metabox">
+  <span><b>Author:</b> Folahan Williams — Investment Analyst Intern</span>
+  <span><b>Team:</b> Funds Management &amp; Technology</span>
+  <span><b>Date:</b> Thursday, 18 June</span>
+</div>
+
+<p><b>Purpose.</b> Show, on one page, how the system is wired end to end — how data flows, where it
+is fetched, what the backend computes, what the frontend renders, and what the Portfolio Manager
+actually sees on screen.</p>
+
+<h2>1 &nbsp; One-line picture</h2>
+<p>A fund's <b>holdings, prices, and benchmark</b> go in. A single screen comes out showing
+<b>what we hold, how much risk we carry, and what drove performance</b> — computed once on the
+server, rendered instantly on the client.</p>
+<div class="rule">The frontend never computes fund math. The backend never handles presentation.
+This separation is the load-bearing decision: the analytics layer is built so it can graduate to
+production use without a rewrite.</div>
+
+<h2>2 &nbsp; The workflow at a glance</h2>
+
+<table class="flow">
+  <tr><td>
+    <div class="stage s1">
+      <div class="stitle">1 · DATA SOURCE &nbsp;(mock files — no database)</div>
+      <div class="sbody">holdings.csv (shares, sector, region, currency) &nbsp;·&nbsp; prices.csv (daily history)
+      &nbsp;·&nbsp; benchmark.csv (index weights &amp; returns) &nbsp;·&nbsp; fx.csv (rates &rarr; USD)</div>
+    </div>
+  </td></tr>
+  <tr><td class="arrow">&#9660;</td></tr>
+  <tr><td>
+    <div class="stage s2">
+      <div class="stitle">2 · BACKEND — Python · FastAPI · pandas / numpy</div>
+      <div class="sbody">Data Loader (validate · skip &amp; flag bad rows) &nbsp;&rarr;&nbsp;
+      Analytics Engine (FX-normalise &rarr; all fund math) &nbsp;&rarr;&nbsp;
+      REST Endpoints (/summary · /exposure · /risk · /attribution)</div>
+    </div>
+  </td></tr>
+  <tr><td class="arrow">&#9660;&nbsp;&nbsp;<span style="font-size:9pt;color:#5a6b7b;">JSON over REST</span></td></tr>
+  <tr><td>
+    <div class="stage s3">
+      <div class="stitle">3 · FRONTEND — React · TypeScript · Vite · Tailwind · Recharts/Plotly</div>
+      <div class="sbody">API client (fetch JSON) &nbsp;&rarr;&nbsp; Dashboard shell (tabs · window · filters)
+      &nbsp;&rarr;&nbsp; Charts &amp; tables (pure presentation, no fund math)</div>
+    </div>
+  </td></tr>
+  <tr><td class="arrow">&#9660;</td></tr>
+  <tr><td>
+    <div class="stage s4">
+      <div class="stitle">4 · PORTFOLIO MANAGER</div>
+      <div class="sbody">One screen: positioning · risk · attribution.
+      &nbsp; Change window / filter &nbsp;&#8617;&nbsp; loops back to the backend, recomputes &lt; 500 ms.</div>
+    </div>
+  </td></tr>
+</table>
+
+<p><b>Read it top to bottom:</b> mock files &rarr; backend loads &amp; validates &rarr; analytics engine
+computes all fund math &rarr; thin REST endpoints serve JSON &rarr; frontend fetches and renders &rarr;
+manager sees one screen. Changing the date window or a filter loops the request back to the backend,
+and the screen recomputes in under half a second.</p>
+
+<h2>3 &nbsp; Where the data is fetched</h2>
+<p>For the prototype, <b>all data is local mock files</b> loaded by the backend — no database, no
+external dependencies, runs on a laptop or the internal server.</p>
+<table>
+  <tr><th>Input</th><th>Holds</th><th>Used for</th></tr>
+  <tr><td><code>holdings.csv</code></td><td>shares, sector, region, native currency per security</td><td>AUM, weights, exposure</td></tr>
+  <tr><td><code>prices.csv</code></td><td>daily price history (November last year onward)</td><td>returns, volatility, beta, VaR, drawdown</td></tr>
+  <tr><td><code>benchmark.csv</code></td><td>index sector/region weights &amp; returns (S&amp;P tech basket)</td><td>active weights, Brinson attribution</td></tr>
+  <tr><td><code>fx.csv</code></td><td>currency rates to USD</td><td>currency-normalising every cross-holding total</td></tr>
+</table>
+<p><b>Currency:</b> every holding is normalised to <b>USD</b> before any total is aggregated — once,
+inside the backend, before metrics are computed.</p>
+<p><b>Production path</b> (out of scope now, designed for later): the loader is the <i>only</i> place
+that touches raw data. Swapping mock CSVs for live custodian / market-data feeds (e.g. Finnhub) is a
+change to that one layer — the analytics engine and frontend are untouched.</p>
+
+<h2>4 &nbsp; The backend — where the thinking happens</h2>
+<p><b>Stack:</b> Python · FastAPI · pandas / numpy. Three stages, in order:</p>
+<p><b>1. Load &amp; validate</b> — read the mock files, check each row. Malformed or missing rows are
+<b>skipped and flagged</b>, never crash the app. &nbsp;<b>2. Analytics engine</b> — FX-normalise, then
+compute every metric (AUM, weights, active weights, volatility, beta, Sharpe, VaR 95/99, max drawdown,
+contribution, Brinson allocation vs selection), each validated against an independent reference to
+within ±0.1%. &nbsp;<b>3. Serve</b> — four thin REST endpoints return ready-to-render JSON.</p>
+<table>
+  <tr><th>Endpoint</th><th>Powers the screen section</th><th>Returns</th></tr>
+  <tr><td><code>GET /summary</code></td><td>Portfolio Summary</td><td>AUM, P&amp;L, total &amp; active return, top contributors/detractors</td></tr>
+  <tr><td><code>GET /exposure</code></td><td>Sector &amp; Geographic Exposure</td><td>sector/region weights, signed active weights, HHI / effective N, heatmap data</td></tr>
+  <tr><td><code>GET /risk</code></td><td>Risk Metrics</td><td>volatility, beta, Sharpe, VaR (95/99, historical &amp; parametric), correlation matrix, max drawdown</td></tr>
+  <tr><td><code>GET /attribution</code></td><td>Performance Attribution</td><td>MTD/QTD/YTD/1Y returns, contribution by security &amp; sector, Brinson alloc vs selection</td></tr>
+</table>
+
+<h2>5 &nbsp; The frontend — what gets rendered</h2>
+<p><b>Stack:</b> React · TypeScript · Vite · Tailwind · Recharts / Plotly. A <b>pure presentation
+layer</b>: it fetches JSON from the four endpoints and renders it, holding no fund math — only display
+state (open tab, date window, filters). Each section maps one-to-one to one backend endpoint, so the
+data path for any view is obvious and traceable.</p>
+<table class="pillrow">
+  <tr>
+    <td><span class="pill">Portfolio Summary<br/><code>/summary</code></span></td>
+    <td><span class="pill">Sector &amp; Geo Exposure<br/><code>/exposure</code></span></td>
+    <td><span class="pill">Risk Metrics<br/><code>/risk</code></span></td>
+    <td><span class="pill">Performance Attribution<br/><code>/attribution</code></span></td>
+  </tr>
+</table>
+
+<h2>6 &nbsp; What the user sees (UI / UX)</h2>
+<p>The Portfolio Manager opens <b>one screen</b> and gets the three core answers in seconds — no
+scrolling needed for the primary insights.</p>
+<pre>
++--------------------------------------------------------------------------+
+|  PORTFOLIO INTELLIGENCE        [ Window: 1M v ]   [ Filter: All v ]       |
++--------------------------------------------------------------------------+
+|  AUM (USD)        Total Return       Active vs Benchmark                  |
+|  $XX.Xm           +X.X%              +X.X%                  <- Summary     |
+|  Top contributors:  ^ AAPL  ^ MSFT     Top detractors:  v NVDA  v AMD     |
++-----------------------------------------+--------------------------------+
+|  SECTOR &amp; GEOGRAPHIC EXPOSURE           |  RISK METRICS                  |
+|  [ exposure heatmap ]                    |  Volatility  Beta  Sharpe      |
+|  active weights (signed vs bench)        |  VaR 95%/99%   Max Drawdown    |
+|  HHI / effective N                       |  correlation heatmap           |
++-----------------------------------------+--------------------------------+
+|  PERFORMANCE ATTRIBUTION                                                  |
+|  MTD  QTD  YTD  1Y   |  contribution by sector/security                   |
+|  Brinson: allocation vs selection by sector                              |
++--------------------------------------------------------------------------+
+</pre>
+<p><b>Interaction model:</b> the manager changes the <b>window</b> (MTD / QTD / YTD / 1Y) or a
+<b>filter</b> (sector / region) once, at the top. Every panel below <b>recomputes from the backend in
+under 500 ms</b> — positioning, risk and attribution update together against the same window.
+<b>Empty and error states are explicit:</b> missing or flagged data is stated clearly, never shown as
+a blank or a wrong number.</p>
+<table>
+  <tr><th>What the manager experiences</th><th>Target</th></tr>
+  <tr><td>Time to the three core answers</td><td>&lt; 30 s from load</td></tr>
+  <tr><td>Initial load (mock data)</td><td>&lt; 2 s</td></tr>
+  <tr><td>Recompute on window/filter change</td><td>&lt; 500 ms</td></tr>
+  <tr><td>Metric accuracy vs independent reference</td><td>within ±0.1%</td></tr>
+</table>
+
+<h2>7 &nbsp; Why it's built this way (the foundation point)</h2>
+<p>A 3-week prototype on mock data, but built as a <b>production-track foundation</b>:</p>
+<table>
+  <tr><th>Decision</th><th>Why it matters for production</th></tr>
+  <tr><td>Analytics separated from presentation</td><td>the fund math lifts into production unchanged</td></tr>
+  <tr><td>One loader owns all data access</td><td>mock CSVs swap for live feeds in a single place</td></tr>
+  <tr><td>Thin, typed REST contract</td><td>frontend and backend evolve independently</td></tr>
+  <tr><td>Graceful degradation + ±0.1% validation</td><td>trustworthy enough to graduate to formal use without a rewrite</td></tr>
+</table>
+
+<h2>8 &nbsp; Week 1 status (Foundation)</h2>
+<table>
+  <tr><th>Item</th><th>State</th></tr>
+  <tr><td>Stack &amp; data confirmed</td><td>Done</td></tr>
+  <tr><td>Workflow / foundation map</td><td>Done (this document)</td></tr>
+  <tr><td>Data pipeline (load &rarr; validate &rarr; normalise)</td><td>In progress</td></tr>
+  <tr><td>Dashboard shell</td><td>In progress</td></tr>
+  <tr><td>Portfolio Summary working end to end</td><td>Next</td></tr>
+</table>
+<p><b>Next:</b> stand up the pipeline + shell, deliver the working Portfolio Summary, and begin AI
+sector research — leading into Week 2 (Exposure, Risk, Attribution).</p>
+
+<div class="footer">Portfolio Intelligence Dashboard · Foundation Workflow Map · Folahan Williams ·
+Funds Management &amp; Technology · Week 1</div>
+
+</body>
+</html>
