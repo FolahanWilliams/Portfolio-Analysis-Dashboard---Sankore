@@ -1,0 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  @apply bg-slate-100 text-slate-800 font-sans;
+}
+
+/* Numeric figures align nicely in tables. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
