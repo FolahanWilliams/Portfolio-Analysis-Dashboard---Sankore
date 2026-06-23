@@ -57,8 +57,8 @@ export function AttributionSection({ window }: { window: WindowCode }) {
               <Tooltip formatter={(v: number) => fmtSignedPct(v)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <ReferenceLine y={0} stroke="#cbd5e1" />
-              <Bar dataKey="Portfolio" fill="#1f6feb" radius={3} />
-              <Bar dataKey="Benchmark" fill="#94a3b8" radius={3} />
+              <Bar dataKey="Portfolio" fill="#1f6feb" radius={3} isAnimationActive={false} />
+              <Bar dataKey="Benchmark" fill="#94a3b8" radius={3} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -73,8 +73,8 @@ export function AttributionSection({ window }: { window: WindowCode }) {
               <Tooltip formatter={(v: number) => fmtSignedPct(v)} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <ReferenceLine y={0} stroke="#cbd5e1" />
-              <Bar dataKey="Allocation" stackId="a" fill="#0f2c4d" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="Selection" stackId="a" fill="#38bdf8" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="Allocation" stackId="a" fill="#0f2c4d" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+              <Bar dataKey="Selection" stackId="a" fill="#38bdf8" radius={[3, 3, 0, 0]} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

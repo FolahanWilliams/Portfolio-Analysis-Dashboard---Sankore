@@ -30,7 +30,7 @@ function ActiveWeightChart({ rows, keyField }: { rows: GroupWeight[]; keyField: 
         <Tooltip formatter={(v: number) => [fmtSignedPct(v), "Active weight"]}
           contentStyle={{ fontSize: 12, borderRadius: 8 }} />
         <ReferenceLine x={0} stroke="#cbd5e1" />
-        <Bar dataKey="active" radius={3}>
+        <Bar dataKey="active" radius={3} isAnimationActive={false}>
           {data.map((d, i) => (
             <Cell key={i} fill={d.active >= 0 ? "#16a34a" : "#dc2626"} />
           ))}

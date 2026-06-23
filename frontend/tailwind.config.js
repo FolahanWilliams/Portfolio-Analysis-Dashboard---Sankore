@@ -14,7 +14,7 @@ export default {
         negative: "#dc2626",
       },
       fontFamily: {
-        sans: ["Inter", "Calibri", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Calibri", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
     },
