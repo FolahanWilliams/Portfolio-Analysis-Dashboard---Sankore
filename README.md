@@ -9,7 +9,11 @@ This is a 3-week prototype on mock data, built as a **production-track
 foundation**: the analytics layer is fully separated from presentation so it can
 graduate to formal use without a rewrite.
 
-![Dashboard](docs/dashboard-screenshot.png)
+![Dashboard — P0](docs/dashboard-screenshot.png)
+
+P1 stretch features (alert feed + scenario analysis):
+
+![Dashboard — P1](docs/dashboard-p1.png)
 
 ---
 
