@@ -1,0 +1,13 @@
+.git
+node_modules
+frontend/node_modules
+frontend/dist
+backend/.venv
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+backend/tests
+/dashboard-*.png
+docs/*.png
+*.log
