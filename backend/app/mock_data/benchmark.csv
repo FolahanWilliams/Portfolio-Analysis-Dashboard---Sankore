@@ -1,0 +1,17 @@
+ticker,name,sector,region,currency,weight
+AAPL,Apple Inc.,Hardware,US,USD,0.16
+MSFT,Microsoft Corp.,Software,US,USD,0.16
+NVDA,NVIDIA Corp.,Semiconductors,US,USD,0.15
+GOOGL,Alphabet Inc.,Internet,US,USD,0.09
+AMZN,Amazon.com Inc.,Internet,US,USD,0.09
+META,Meta Platforms Inc.,Internet,US,USD,0.08
+AVGO,Broadcom Inc.,Semiconductors,US,USD,0.06
+AMD,Advanced Micro Devices,Semiconductors,US,USD,0.03
+CRM,Salesforce Inc.,Software,US,USD,0.03
+ADBE,Adobe Inc.,Software,US,USD,0.03
+ORCL,Oracle Corp.,Software,US,USD,0.03
+QCOM,Qualcomm Inc.,Semiconductors,US,USD,0.02
+ASML,ASML Holding NV,Semiconductors,Europe,EUR,0.03
+SAP,SAP SE,Software,Europe,EUR,0.02
+0700,Tencent Holdings,Internet,Asia,HKD,0.01
+TSM,Taiwan Semiconductor,Semiconductors,Asia,USD,0.01
