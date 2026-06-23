@@ -8,6 +8,7 @@ export function Matrix({
   color,
   format,
   rowHeader = "",
+  cellSize = 56,
 }: {
   rowLabels: string[];
   colLabels: string[];
@@ -15,17 +16,19 @@ export function Matrix({
   color: (v: number) => string;
   format: (v: number) => string;
   rowHeader?: string;
+  cellSize?: number;
 }) {
+  const dense = cellSize < 48;
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-separate" style={{ borderSpacing: 2 }}>
+      <table className="border-separate" style={{ borderSpacing: 2 }}>
         <thead>
           <tr>
-            <th className="px-2 py-1 text-left text-[11px] font-medium text-slate-400">
+            <th className="px-1 py-1 text-left text-[11px] font-medium text-slate-400">
               {rowHeader}
             </th>
             {colLabels.map((c) => (
-              <th key={c} className="px-2 py-1 text-center text-[11px] font-medium text-slate-500">
+              <th key={c} className="px-1 py-1 text-center text-[10px] font-medium text-slate-500">
                 {c}
               </th>
             ))}
@@ -34,14 +37,14 @@ export function Matrix({
         <tbody>
           {rowLabels.map((r, i) => (
             <tr key={r}>
-              <td className="whitespace-nowrap px-2 py-1 text-right text-xs font-medium text-slate-600">
+              <td className="whitespace-nowrap px-1 py-1 text-right text-[11px] font-medium text-slate-600">
                 {r}
               </td>
               {values[i].map((v, j) => (
                 <td
                   key={j}
-                  className="rounded text-center text-[11px] tabular text-slate-700"
-                  style={{ backgroundColor: color(v), minWidth: 56, height: 34 }}
+                  className={`rounded text-center tabular text-slate-700 ${dense ? "text-[9px]" : "text-[11px]"}`}
+                  style={{ backgroundColor: color(v), minWidth: cellSize, width: cellSize, height: dense ? 26 : 34 }}
                   title={`${r} × ${colLabels[j]}: ${format(v)}`}
                 >
                   {format(v)}

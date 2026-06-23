@@ -46,10 +46,14 @@ export default function App() {
         {/* Attribution full width */}
         <AttributionSection window={window} />
 
-        {/* P1 stretch: alerts + scenario analysis */}
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <AlertsSection window={window} />
-          <ScenarioSection sectors={meta?.sectors ?? []} />
+        {/* P1 stretch: alerts (compact) + scenario analysis (wider) */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-1">
+            <AlertsSection window={window} />
+          </div>
+          <div className="xl:col-span-2">
+            <ScenarioSection sectors={meta?.sectors ?? []} />
+          </div>
         </div>
       </div>
     </Shell>

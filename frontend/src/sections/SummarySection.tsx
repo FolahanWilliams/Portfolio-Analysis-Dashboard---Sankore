@@ -6,21 +6,23 @@ import { fmtMoney, fmtSignedPct, signClass } from "../lib/format";
 
 function ContribRow({ c }: { c: Contribution }) {
   const max = 0.06; // scale bar to a sensible contribution magnitude
-  const w = Math.min(Math.abs(c.contribution) / max, 1) * 100;
+  // Half-width bars diverge from a centre line; cap at 50% so they never
+  // overflow the track into the return column.
+  const w = Math.min(Math.abs(c.contribution) / max, 1) * 50;
   return (
     <div className="flex items-center gap-3 py-1.5">
-      <div className="w-32 truncate text-sm font-medium text-slate-700" title={c.name}>
-        <span className="text-slate-400">{c.ticker}</span>
+      <div className="w-16 shrink-0 truncate text-sm font-medium" title={c.name}>
+        <span className="text-slate-600">{c.ticker}</span>
       </div>
-      <div className="relative h-2 flex-1 rounded bg-slate-100">
+      <div className="relative h-2 flex-1 overflow-hidden rounded bg-slate-100">
         <div
-          className={`absolute top-0 h-2 rounded ${c.contribution >= 0 ? "bg-positive" : "bg-negative"}`}
-          style={{ width: `${w}%`, left: c.contribution >= 0 ? "50%" : `${50 - w / 2}%` }}
+          className={`absolute top-0 h-2 ${c.contribution >= 0 ? "bg-positive" : "bg-negative"}`}
+          style={{ width: `${w}%`, left: c.contribution >= 0 ? "50%" : `${50 - w}%` }}
         />
         <div className="absolute left-1/2 top-0 h-2 w-px bg-slate-300" />
       </div>
-      <div className="w-20 text-right text-xs tabular text-slate-500">{fmtSignedPct(c.return)}</div>
-      <div className={`w-20 text-right text-xs tabular font-medium ${signClass(c.contribution)}`}>
+      <div className="w-16 shrink-0 text-right text-xs tabular text-slate-500">{fmtSignedPct(c.return)}</div>
+      <div className={`w-16 shrink-0 text-right text-xs tabular font-medium ${signClass(c.contribution)}`}>
         {fmtSignedPct(c.contribution)}
       </div>
     </div>
@@ -60,16 +62,18 @@ export function SummarySection({ window }: { window: WindowCode }) {
 
       <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Top contributors</span>
-            <span className="flex gap-6"><span>return</span><span>contrib</span></span>
+          <div className="mb-1 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <span className="flex-1">Top contributors</span>
+            <span className="w-16 shrink-0 text-right">return</span>
+            <span className="w-16 shrink-0 text-right">contrib</span>
           </div>
           {data.top_contributors.map((c) => <ContribRow key={c.ticker} c={c} />)}
         </div>
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Top detractors</span>
-            <span className="flex gap-6"><span>return</span><span>contrib</span></span>
+          <div className="mb-1 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <span className="flex-1">Top detractors</span>
+            <span className="w-16 shrink-0 text-right">return</span>
+            <span className="w-16 shrink-0 text-right">contrib</span>
           </div>
           {data.top_detractors.map((c) => <ContribRow key={c.ticker} c={c} />)}
         </div>

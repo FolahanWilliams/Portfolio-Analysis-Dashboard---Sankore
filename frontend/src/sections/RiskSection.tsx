@@ -74,6 +74,7 @@ export function RiskSection({ window }: { window: WindowCode }) {
             values={data.correlation.matrix}
             color={corrColor}
             format={(v) => v.toFixed(2)}
+            cellSize={34}
           />
         </div>
       </div>

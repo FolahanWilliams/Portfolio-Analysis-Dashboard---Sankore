@@ -15,13 +15,13 @@ function pctToFrac(p: Pct): Pct {
 
 function MoverRow({ h }: { h: ScenarioHolding }) {
   return (
-    <div className="flex items-center justify-between py-1 text-sm">
-      <span className="font-medium text-slate-600">{h.ticker}</span>
-      <span className="flex items-center gap-3">
-        <span className={`tabular ${signClass(h.shock_return)}`}>{fmtSignedPct(h.shock_return)}</span>
-        <span className={`w-20 text-right tabular ${signClass(h.value_change)}`}>
-          {fmtMoney(h.value_change)}
-        </span>
+    <div className="flex items-center gap-2 py-1 text-sm">
+      <span className="w-14 shrink-0 font-medium text-slate-600">{h.ticker}</span>
+      <span className={`flex-1 text-right tabular ${signClass(h.shock_return)}`}>
+        {fmtSignedPct(h.shock_return)}
+      </span>
+      <span className={`w-24 shrink-0 text-right tabular ${signClass(h.value_change)}`}>
+        {fmtMoney(h.value_change)}
       </span>
     </div>
   );
@@ -104,17 +104,17 @@ export function ScenarioSection({ sectors }: { sectors: string[] }) {
           <p className="mt-1 text-[11px] text-slate-400">Applied to each holding via its beta.</p>
 
           <h3 className="mb-2 mt-5 text-xs font-semibold text-slate-500">Sector shocks (%)</h3>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             {sectors.map((s) => (
               <label key={s} className="flex items-center justify-between gap-2 text-sm">
-                <span className="truncate text-slate-600">{s}</span>
+                <span className="min-w-0 flex-1 truncate text-slate-600" title={s}>{s}</span>
                 <input
                   type="number"
                   value={sectorShocks[s] ?? 0}
                   onChange={(e) =>
                     setSectorShocks((p) => ({ ...p, [s]: Number(e.target.value) }))
                   }
-                  className="w-16 rounded border border-slate-200 px-2 py-1 text-right tabular"
+                  className="w-14 shrink-0 rounded border border-slate-200 px-2 py-1 text-right tabular"
                 />
               </label>
             ))}
@@ -159,13 +159,17 @@ export function ScenarioSection({ sectors }: { sectors: string[] }) {
                   }
                 />
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-6">
+              <div className="mt-4 space-y-3">
                 <div>
-                  <h4 className="mb-1 text-xs font-semibold text-positive">Top gainers</h4>
+                  <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-positive">
+                    Top gainers
+                  </h4>
                   {data.top_gainers.map((h) => <MoverRow key={h.ticker} h={h} />)}
                 </div>
                 <div>
-                  <h4 className="mb-1 text-xs font-semibold text-negative">Top losers</h4>
+                  <h4 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-negative">
+                    Top losers
+                  </h4>
                   {data.top_losers.map((h) => <MoverRow key={h.ticker} h={h} />)}
                 </div>
               </div>
