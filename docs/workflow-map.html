@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio Intelligence Dashboard — Workflow Map</title>
+<style>
+  body { font-family: "Calibri", Arial, sans-serif; color: #1c2733; font-size: 11pt; line-height: 1.3; }
+  h1 { font-size: 20pt; color: #0f2c4d; margin: 0 0 1px 0; }
+  .subtitle { color: #5a6b7b; font-size: 10.5pt; margin: 0 0 2px 0; }
+  .meta { color: #5a6b7b; font-size: 9pt; margin: 0 0 16px 0; }
+  h2 { font-size: 12.5pt; color: #0f2c4d; margin: 22px 0 8px 0; }
+  table { border-collapse: collapse; width: 100%; }
+  td { vertical-align: middle; }
+  .lbl { font-size: 8pt; color: #5a6b7b; font-weight: 700; letter-spacing: .5px; }
+  .box { padding: 9px 11px; }
+  .bt { font-weight: 700; font-size: 10.5pt; }
+  .bb { font-size: 9pt; color: #33414f; line-height: 1.35; }
+  .s1 { background: #e8f0fb; border: 1px solid #bcd3ef; }
+  .s2 { background: #e7f6ee; border: 1px solid #b7e0c8; }
+  .s3 { background: #fdf0e6; border: 1px solid #f0cfae; }
+  .s4 { background: #f0e9f8; border: 1px solid #d3bfe8; }
+  .arr { text-align: center; font-size: 17pt; color: #1f6feb; font-weight: 700; }
+  .arrlbl { font-size: 8pt; color: #5a6b7b; }
+  .map th { background: #0f2c4d; color:#fff; text-align:left; padding:5px 9px; font-size:9.5pt; }
+  .map td { border: 1px solid #cdd8e3; padding: 5px 9px; font-size: 9.5pt; }
+  .map tr:nth-child(even) td { background:#f5f8fb; }
+  code { font-family:"Consolas",monospace; background:#eef2f6; padding:1px 4px; font-size:9pt; }
+  pre { font-family:"Consolas",monospace; background:#0f2c4d; color:#e8eef5; padding:12px; font-size:8.5pt; line-height:1.3; white-space:pre; }
+  .chips td { padding: 4px; }
+  .chip { background:#eef3f8; border:1px solid #cdd8e3; padding:7px 8px; text-align:center; font-size:9pt; }
+  .chip b { color:#0f2c4d; display:block; font-size:11pt; }
+  .rule { background:#fff8e6; border-left:4px solid #e0a800; padding:8px 12px; font-style:italic; font-size:10pt; margin:6px 0 0 0; }
+  .footer { margin-top:20px; padding-top:8px; border-top:1px solid #cdd8e3; color:#5a6b7b; font-size:8.5pt; }
+</style>
+</head>
+<body>
+
+<h1>Portfolio Intelligence Dashboard</h1>
+<div class="subtitle">Foundation Workflow Map</div>
+<div class="meta">Folahan Williams · Funds Management &amp; Technology · Thursday 18 June · Week 1</div>
+
+<div class="rule">The frontend never computes fund math. The backend never handles presentation.</div>
+
+
+<h2>End-to-end flow</h2>
+<table>
+  <tr>
+    <td class="lbl">1 — DATA (mock files)</td>
+  </tr>
+  <tr><td class="box s1">
+    <span class="bt">holdings · prices · benchmark · fx</span>
+    <span class="bb">&nbsp;&nbsp;CSV files on disk — no database, no external calls</span>
+  </td></tr>
+  <tr><td class="arr">&#9660;</td></tr>
+  <tr><td class="lbl">2 — BACKEND &nbsp;(Python · FastAPI · pandas/numpy)</td></tr>
+  <tr><td class="box s2">
+    <span class="bt">Load &amp; validate &nbsp;&rarr;&nbsp; FX-normalise to USD &nbsp;&rarr;&nbsp; Compute metrics &nbsp;&rarr;&nbsp; Serve REST</span>
+    <div class="bb">all fund math lives here · bad rows skipped &amp; flagged · accuracy &plusmn;0.1%</div>
+  </td></tr>
+  <tr><td class="arr">&#9660; <span class="arrlbl">JSON over REST &nbsp;(/summary · /exposure · /risk · /attribution)</span></td></tr>
+  <tr><td class="lbl">3 — FRONTEND &nbsp;(React · TypeScript · Vite · Tailwind · Recharts)</td></tr>
+  <tr><td class="box s3">
+    <span class="bt">Fetch JSON &nbsp;&rarr;&nbsp; Dashboard shell &nbsp;&rarr;&nbsp; Charts &amp; tables</span>
+    <div class="bb">pure presentation — renders only, holds no fund math</div>
+  </td></tr>
+  <tr><td class="arr">&#9660;</td></tr>
+  <tr><td class="lbl">4 — PORTFOLIO MANAGER</td></tr>
+  <tr><td class="box s4">
+    <span class="bt">One screen: positioning · risk · attribution</span>
+    <div class="bb">change window / filter &nbsp;&#8617;&nbsp; recomputes from backend in &lt; 500 ms</div>
+  </td></tr>
+</table>
+
+
+<h2>Where the data is fetched</h2>
+<table class="map">
+  <tr><th>File</th><th>Holds</th><th>Drives</th></tr>
+  <tr><td><code>holdings</code></td><td>shares, sector, region, currency</td><td>AUM, weights, exposure</td></tr>
+  <tr><td><code>prices</code></td><td>daily history (Nov last yr +)</td><td>returns, volatility, beta, VaR, drawdown</td></tr>
+  <tr><td><code>benchmark</code></td><td>index weights &amp; returns (S&amp;P tech)</td><td>active weights, Brinson attribution</td></tr>
+  <tr><td><code>fx</code></td><td>rates &rarr; USD</td><td>normalise every total to USD</td></tr>
+</table>
+<div class="bb"><b>Production swap:</b> the loader is the only thing that touches raw data — mock CSVs &rarr; live feed (e.g. Finnhub) changes this one layer, nothing else.</div>
+
+
+<h2>Each screen section = one endpoint</h2>
+<table class="map">
+  <tr><th>Endpoint</th><th>Screen section</th><th>Shows</th></tr>
+  <tr><td><code>/summary</code></td><td>Portfolio Summary</td><td>AUM, P&amp;L, total &amp; active return, top contributors/detractors</td></tr>
+  <tr><td><code>/exposure</code></td><td>Sector &amp; Geographic</td><td>weights, signed active weights, HHI / effective N, heatmap</td></tr>
+  <tr><td><code>/risk</code></td><td>Risk Metrics</td><td>volatility, beta, Sharpe, VaR 95/99, correlation, max drawdown</td></tr>
+  <tr><td><code>/attribution</code></td><td>Performance</td><td>MTD/QTD/YTD/1Y, contribution, Brinson alloc vs selection</td></tr>
+</table>
+
+
+<h2>What the manager sees</h2>
+<pre>
++--------------------------------------------------------------------------+
+|  PORTFOLIO INTELLIGENCE        [ Window: 1M v ]   [ Filter: All v ]       |
++--------------------------------------------------------------------------+
+|  AUM (USD)        Total Return      Active vs Benchmark      <- Summary   |
+|  Top contributors  ^ AAPL ^ MSFT    Top detractors  v NVDA v AMD         |
++-----------------------------------------+--------------------------------+
+|  SECTOR &amp; GEOGRAPHIC EXPOSURE           |  RISK METRICS                  |
+|  heatmap · active weights · HHI         |  vol · beta · Sharpe · VaR     |
+|                                         |  drawdown · correlation        |
++-----------------------------------------+--------------------------------+
+|  PERFORMANCE ATTRIBUTION                                                  |
+|  MTD QTD YTD 1Y · contribution · Brinson allocation vs selection         |
++--------------------------------------------------------------------------+
+</pre>
+<table class="chips"><tr>
+  <td class="chip"><b>&lt; 2 s</b>initial load</td>
+  <td class="chip"><b>&lt; 500 ms</b>recompute</td>
+  <td class="chip"><b>&lt; 30 s</b>to core answers</td>
+  <td class="chip"><b>&plusmn;0.1%</b>accuracy</td>
+</tr></table>
+
+<div class="footer">Week 1 status: stack &amp; data confirmed and this map — done · pipeline + shell + Portfolio Summary — in progress.</div>
+
+</body>
+</html>

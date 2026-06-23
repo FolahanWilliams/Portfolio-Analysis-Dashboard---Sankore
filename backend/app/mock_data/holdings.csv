@@ -1,0 +1,15 @@
+ticker,name,sector,region,currency,shares,cost_basis,realised_pnl
+AAPL,Apple Inc.,Hardware,US,USD,4200,198.0,12000.0
+MSFT,Microsoft Corp.,Software,US,USD,1600,380.0,8000.0
+NVDA,NVIDIA Corp.,Semiconductors,US,USD,9000,98.0,-4000.0
+GOOGL,Alphabet Inc.,Internet,US,USD,3800,150.0,3000.0
+AMZN,Amazon.com Inc.,Internet,US,USD,2600,170.0,0.0
+META,Meta Platforms Inc.,Internet,US,USD,1100,500.0,6500.0
+AVGO,Broadcom Inc.,Semiconductors,US,USD,5200,140.0,2000.0
+AMD,Advanced Micro Devices,Semiconductors,US,USD,3400,165.0,-7500.0
+CRM,Salesforce Inc.,Software,US,USD,1500,295.0,0.0
+ADBE,Adobe Inc.,Software,US,USD,700,540.0,-1500.0
+ORCL,Oracle Corp.,Software,US,USD,2900,150.0,4200.0
+ASML,ASML Holding NV,Semiconductors,Europe,EUR,450,640.0,0.0
+SAP,SAP SE,Software,Europe,EUR,2300,185.0,1800.0
+0700,Tencent Holdings,Internet,Asia,HKD,3500,360.0,0.0
