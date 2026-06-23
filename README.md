@@ -29,10 +29,12 @@ graduate to formal use without a rewrite.
 presentation.** Every cross-holding total is normalised to USD before
 aggregation; malformed rows are skipped and flagged, never crash the app.
 
-- **Backend** — Python · FastAPI · pandas/numpy. Four thin REST endpoints
-  (`/summary`, `/exposure`, `/risk`, `/attribution`) plus `/meta` and `/health`.
+- **Backend** — Python · FastAPI · pandas/numpy. REST endpoints `/summary`,
+  `/exposure`, `/risk`, `/attribution` (P0), plus `/alerts` and `/scenario`
+  (P1), plus `/meta` and `/health`.
 - **Frontend** — React · TypeScript · Vite · Tailwind · Recharts. A single-screen
-  dashboard with a global window selector (MTD/QTD/YTD/1Y/All).
+  dashboard with a global window selector (MTD/QTD/YTD/1Y/All) and one-click
+  PDF export.
 
 See [`docs/workflow-map.md`](docs/workflow-map.md) for the foundation workflow map.
 
@@ -51,6 +53,8 @@ backend/
       exposure.py         weights, active weights, HHI, heatmap
       risk.py             vol, beta, Sharpe, VaR, correlation, drawdown
       attribution.py      period returns, contribution, Brinson
+      alerts.py           rule-based limit checks (P1)
+      scenario.py         shock-and-reprice engine (P1)
     models/schemas.py     window enum
     main.py               FastAPI app + endpoints
     mock_data/            generated CSVs
@@ -129,9 +133,10 @@ cd backend && source .venv/bin/activate && pytest -q
 
 ## Scope
 
-- **P0 (shipped in this draft):** Portfolio Summary, Sector & Geographic
-  Exposure, Risk Metrics, Performance Attribution.
-- **P1 (next):** rule-based alert feed, scenario shocks, one-click PDF report.
+- **P0 (shipped):** Portfolio Summary, Sector & Geographic Exposure, Risk
+  Metrics, Performance Attribution.
+- **P1 (shipped):** rule-based alert feed, scenario shock-and-reprice,
+  one-click PDF export (print).
 - **Out of scope (production phase):** live custodian/brokerage feeds, trading,
   multi-user auth/persistence, intraday streaming.
 

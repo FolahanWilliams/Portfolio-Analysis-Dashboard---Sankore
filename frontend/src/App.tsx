@@ -6,6 +6,8 @@ import { SummarySection } from "./sections/SummarySection";
 import { ExposureSection } from "./sections/ExposureSection";
 import { RiskSection } from "./sections/RiskSection";
 import { AttributionSection } from "./sections/AttributionSection";
+import { AlertsSection } from "./sections/AlertsSection";
+import { ScenarioSection } from "./sections/ScenarioSection";
 import { ErrorState } from "./components/ui";
 
 export default function App() {
@@ -43,6 +45,12 @@ export default function App() {
 
         {/* Attribution full width */}
         <AttributionSection window={window} />
+
+        {/* P1 stretch: alerts + scenario analysis */}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <AlertsSection window={window} />
+          <ScenarioSection sectors={meta?.sectors ?? []} />
+        </div>
       </div>
     </Shell>
   );

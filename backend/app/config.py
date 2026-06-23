@@ -27,3 +27,18 @@ MOCK_DATA_DIR = os.environ.get(
 # Supported selectable windows for the dashboard (label -> meaning).
 SUPPORTED_WINDOWS = ["MTD", "QTD", "YTD", "1Y", "ALL"]
 DEFAULT_WINDOW = "YTD"
+
+# --- P1: rule-based alert thresholds ---------------------------------------
+# Each limit drives one rule in analytics/alerts.py. Tuned for the mock book so
+# the demo trips a representative mix of warnings and breaches. In production
+# these would come from the risk mandate / IPS.
+ALERT_THRESHOLDS = {
+    "single_name_weight": 0.10,     # any holding above 10% of AUM
+    "sector_active_weight": 0.05,   # |sector active weight| above 5%
+    "hhi": 0.15,                    # concentration (HHI) above 0.15
+    "volatility": 0.20,             # annualised vol above 20%
+    "beta_high": 1.20,              # portfolio beta above 1.20
+    "beta_low": 0.80,               # portfolio beta below 0.80
+    "var99": 0.035,                 # 1-day 99% historical VaR worse than 3.5%
+    "max_drawdown": 0.12,           # peak-to-trough beyond 12%
+}

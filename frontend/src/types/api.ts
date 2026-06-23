@@ -114,6 +114,58 @@ export interface BrinsonRow {
   total: number;
 }
 
+export type Severity = "breach" | "warning";
+
+export interface Alert {
+  id: string;
+  severity: Severity;
+  category: string;
+  title: string;
+  detail: string;
+  value: number;
+  threshold: number;
+}
+
+export interface AlertFeed {
+  window: WindowCode;
+  as_of: string;
+  counts: { breach: number; warning: number };
+  alerts: Alert[];
+  data_quality: DataQuality;
+}
+
+export interface ScenarioRequest {
+  market: number;
+  sector_shocks: Record<string, number>;
+  fx_shocks: Record<string, number>;
+}
+
+export interface ScenarioHolding {
+  ticker: string;
+  name: string;
+  sector: string;
+  currency: string;
+  beta: number;
+  weight: number;
+  shock_return: number;
+  value_before: number;
+  value_after: number;
+  value_change: number;
+}
+
+export interface Scenario {
+  as_of: string;
+  inputs: ScenarioRequest;
+  base_aum: number;
+  new_aum: number;
+  pnl_change: number;
+  portfolio_return: number;
+  top_gainers: ScenarioHolding[];
+  top_losers: ScenarioHolding[];
+  by_holding: ScenarioHolding[];
+  data_quality: DataQuality;
+}
+
 export interface Attribution {
   window: WindowCode;
   as_of: string;

@@ -19,6 +19,7 @@ import math
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 
 from app.config import DEFAULT_WINDOW, SUPPORTED_WINDOWS
 from app.data.loader import load_market_data
@@ -27,6 +28,8 @@ from app.analytics.summary import compute_summary
 from app.analytics.exposure import compute_exposure
 from app.analytics.risk import compute_risk
 from app.analytics.attribution import compute_attribution
+from app.analytics.alerts import compute_alerts
+from app.analytics.scenario import apply_scenario
 from app.models.schemas import Window
 
 app = FastAPI(
@@ -43,9 +46,15 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:4173",
     ],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+class ScenarioRequest(BaseModel):
+    market: float = Field(0.0, description="Market shock, e.g. -0.10 for -10%")
+    sector_shocks: dict[str, float] = Field(default_factory=dict)
+    fx_shocks: dict[str, float] = Field(default_factory=dict)
 
 
 def _sanitize(obj):
@@ -137,3 +146,20 @@ def attribution(window: Window = Query(default=Window(DEFAULT_WINDOW))):
     if w is None:
         return _empty_response()
     return _respond(compute_attribution(md, w), md)
+
+
+@app.get("/alerts")
+def alerts(window: Window = Query(default=Window(DEFAULT_WINDOW))):
+    md, w = _load_and_resolve(window.value)
+    if w is None:
+        return _empty_response()
+    return _respond(compute_alerts(md, w), md)
+
+
+@app.post("/scenario")
+def scenario(req: ScenarioRequest):
+    md = load_market_data()
+    if len(md.dates) == 0:
+        return _empty_response()
+    result = apply_scenario(md, req.market, req.sector_shocks, req.fx_shocks)
+    return _respond(result, md)

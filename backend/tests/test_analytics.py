@@ -17,6 +17,8 @@ from app.analytics.summary import compute_summary
 from app.analytics.exposure import compute_exposure
 from app.analytics.risk import compute_risk
 from app.analytics.attribution import compute_attribution
+from app.analytics.alerts import compute_alerts
+from app.analytics.scenario import apply_scenario
 
 REL = 1e-3  # +/-0.1%
 
@@ -127,3 +129,38 @@ def test_all_windows_resolve(md):
         compute_summary(md, w)
         compute_risk(md, w)
         compute_attribution(md, w)
+
+
+def test_alerts_shape_and_severity(md):
+    out = compute_alerts(md, _w(md))
+    assert set(out["counts"]) == {"breach", "warning"}
+    for a in out["alerts"]:
+        assert a["severity"] in {"breach", "warning"}
+        assert a["value"] is not None and a["threshold"] is not None
+    # breaches must sort before warnings
+    sev = [a["severity"] for a in out["alerts"]]
+    assert sev == sorted(sev, key=lambda s: 0 if s == "breach" else 1)
+
+
+def test_scenario_market_down_reprices_lower(md):
+    base = apply_scenario(md, market=0.0)
+    down = apply_scenario(md, market=-0.10)
+    assert down["new_aum"] < base["new_aum"]
+    # P&L impact roughly = portfolio beta * shock * AUM; sign and scale sane.
+    assert down["pnl_change"] < 0
+    assert down["portfolio_return"] == pytest.approx(
+        down["pnl_change"] / down["base_aum"], rel=REL)
+
+
+def test_scenario_zero_shock_is_flat(md):
+    flat = apply_scenario(md, market=0.0)
+    assert flat["pnl_change"] == pytest.approx(0.0, abs=1e-6)
+    assert flat["new_aum"] == pytest.approx(flat["base_aum"], rel=REL)
+
+
+def test_scenario_fx_only_hits_nonusd(md):
+    # A pure EUR shock should move only EUR holdings.
+    out = apply_scenario(md, fx_shocks={"EUR": -0.05})
+    moved = [r for r in out["by_holding"] if r["shock_return"] != 0.0]
+    assert all(r["currency"] == "EUR" for r in moved)
+    assert len(moved) >= 1

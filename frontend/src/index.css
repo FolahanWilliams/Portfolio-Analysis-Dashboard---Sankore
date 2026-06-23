@@ -14,3 +14,27 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* One-click PDF: print the dashboard cleanly (Export PDF -> print to PDF). */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  body {
+    background: #fff;
+  }
+  /* Keep header colours and chart fills when printing. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Don't split a card across pages, and let scroll areas expand. */
+  section {
+    break-inside: avoid;
+  }
+  .max-h-72,
+  .overflow-y-auto {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
