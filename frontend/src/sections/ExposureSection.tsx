@@ -32,7 +32,7 @@ function ActiveWeightChart({ rows, keyField }: { rows: GroupWeight[]; keyField: 
         <ReferenceLine x={0} stroke="#cbd5e1" />
         <Bar dataKey="active" radius={3} isAnimationActive={false}>
           {data.map((d, i) => (
-            <Cell key={i} fill={d.active >= 0 ? "#16a34a" : "#dc2626"} />
+            <Cell key={i} fill={d.active >= 0 ? "#059669" : "#dc2626"} />
           ))}
         </Bar>
       </BarChart>

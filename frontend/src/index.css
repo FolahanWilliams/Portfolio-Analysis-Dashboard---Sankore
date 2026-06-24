@@ -7,7 +7,13 @@ html {
 }
 
 body {
-  @apply bg-slate-100 text-slate-800 font-sans;
+  @apply text-slate-800 font-sans;
+  /* Soft, slightly cool backdrop so the white cards lift off the page. */
+  background:
+    radial-gradient(1100px 520px at 50% -8%, #e6edf7 0%, rgba(230, 237, 247, 0) 60%),
+    linear-gradient(180deg, #eff3f9 0%, #e9eef6 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 /* Numeric figures align nicely in tables. */

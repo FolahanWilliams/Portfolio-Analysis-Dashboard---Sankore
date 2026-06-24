@@ -7,8 +7,8 @@ import { fmtNum, fmtPct, signClass } from "../lib/format";
 
 function corrColor(v: number): string {
   // -1 (red) .. 0 (white) .. 1 (blue)
-  if (v >= 0) return `hsl(213, 70%, ${96 - v * 50}%)`;
-  return `hsl(0, 65%, ${96 - -v * 46}%)`;
+  if (v >= 0) return `hsl(217, 72%, ${97 - v * 52}%)`;
+  return `hsl(2, 62%, ${97 - -v * 46}%)`;
 }
 
 export function RiskSection({ window }: { window: WindowCode }) {

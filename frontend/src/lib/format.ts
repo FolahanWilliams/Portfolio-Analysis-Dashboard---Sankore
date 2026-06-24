@@ -50,13 +50,13 @@ export function signClass(x: number | null | undefined): string {
 // diverging red/green for active weights.
 export function heatBlue(v: number, max: number): string {
   const t = max > 0 ? Math.min(v / max, 1) : 0;
-  // light -> navy
-  const l = 96 - t * 60;
-  return `hsl(213, 70%, ${l}%)`;
+  // very light -> brand blue
+  const l = 97 - t * 58;
+  return `hsl(217, 72%, ${l}%)`;
 }
 
 export function diverging(v: number, max: number): string {
   const t = max > 0 ? Math.max(-1, Math.min(v / max, 1)) : 0;
-  if (t >= 0) return `hsl(145, 60%, ${92 - t * 42}%)`;
-  return `hsl(0, 65%, ${92 - -t * 42}%)`;
+  if (t >= 0) return `hsl(158, 55%, ${93 - t * 42}%)`;
+  return `hsl(2, 62%, ${93 - -t * 42}%)`;
 }

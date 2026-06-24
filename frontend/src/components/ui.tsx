@@ -15,12 +15,17 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`rounded-xl bg-white shadow-sm ring-1 ring-slate-200 ${className}`}>
+    <section className={`rounded-xl bg-white shadow-sm shadow-navy-900/5 ring-1 ring-slate-200/70 ${className}`}>
       {(title || right) && (
-        <header className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+        <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
           <div>
-            {title && <h2 className="text-sm font-semibold text-navy">{title}</h2>}
-            {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+            {title && (
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-navy">
+                <span className="h-3.5 w-1 rounded-full bg-brand" />
+                {title}
+              </h2>
+            )}
+            {subtitle && <p className="ml-3 text-xs text-slate-400">{subtitle}</p>}
           </div>
           {right}
         </header>
@@ -42,7 +47,13 @@ export function StatTile({
   tone?: "neutral" | "value";
 }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
+    <div
+      className={`rounded-lg px-4 py-3 ring-1 ${
+        tone === "value"
+          ? "bg-gradient-to-br from-navy-50 to-white ring-brand/20"
+          : "bg-slate-50/70 ring-slate-200/60"
+      }`}
+    >
       <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
         {label}
       </div>

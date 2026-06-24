@@ -5,13 +5,19 @@ export default {
     extend: {
       colors: {
         navy: {
-          DEFAULT: "#0f2c4d",
-          50: "#f3f7fc",
-          900: "#0f2c4d",
+          DEFAULT: "#102a43",
+          50: "#eef3f9",
+          700: "#1c3d5e",
+          800: "#14324f",
+          900: "#091d31",
         },
-        brand: "#1f6feb",
-        positive: "#16a34a",
+        brand: {
+          DEFAULT: "#2563eb",
+          light: "#60a5fa",
+        },
+        positive: "#059669",
         negative: "#dc2626",
+        surface: "#eef2f8",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Calibri", "sans-serif"],
