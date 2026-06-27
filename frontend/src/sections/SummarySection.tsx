@@ -36,6 +36,7 @@ export function SummarySection({ window }: { window: WindowCode }) {
   if (error) return <Card title="Portfolio Summary"><ErrorState message={error} /></Card>;
   if (!data) return <Card title="Portfolio Summary"><EmptyState message="No data" /></Card>;
 
+  const snapshot = data.mode === "snapshot";
   return (
     <Card
       title="Portfolio Summary"
@@ -45,14 +46,27 @@ export function SummarySection({ window }: { window: WindowCode }) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="AUM" value={fmtMoney(data.aum)} tone="value" />
         <StatTile
-          label={`Total return (${data.window})`}
+          label={snapshot ? "Return (since cost)" : `Total return (${data.window})`}
           value={<span className={signClass(data.total_return)}>{fmtSignedPct(data.total_return)}</span>}
-          sub={<span className="text-slate-400">Benchmark {fmtSignedPct(data.benchmark_return)}</span>}
+          sub={
+            data.benchmark_return != null
+              ? <span className="text-slate-400">Benchmark {fmtSignedPct(data.benchmark_return)}</span>
+              : data.cost_basis != null
+                ? <span className="text-slate-400">Cost {fmtMoney(data.cost_basis)}</span>
+                : undefined
+          }
         />
-        <StatTile
-          label="Active vs benchmark"
-          value={<span className={signClass(data.active_return)}>{fmtSignedPct(data.active_return)}</span>}
-        />
+        {snapshot ? (
+          <StatTile
+            label="Positions at a loss"
+            value={`${data.positions_at_loss ?? 0} / ${data.holdings_count}`}
+          />
+        ) : (
+          <StatTile
+            label="Active vs benchmark"
+            value={<span className={signClass(data.active_return)}>{fmtSignedPct(data.active_return)}</span>}
+          />
+        )}
         <StatTile
           label="Unrealised P&L"
           value={<span className={signClass(data.pnl.unrealised)}>{fmtMoney(data.pnl.unrealised)}</span>}

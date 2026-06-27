@@ -6,6 +6,8 @@ import type {
   Risk,
   Scenario,
   ScenarioRequest,
+  SnapshotAttribution,
+  SnapshotRisk,
   Summary,
   WindowCode,
 } from "../types/api";
@@ -42,8 +44,8 @@ export const api = {
   },
   summary: (w: WindowCode) => get<Summary>("/summary", w),
   exposure: (w: WindowCode) => get<Exposure>("/exposure", w),
-  risk: (w: WindowCode) => get<Risk>("/risk", w),
-  attribution: (w: WindowCode) => get<Attribution>("/attribution", w),
+  risk: (w: WindowCode) => get<Risk | SnapshotRisk>("/risk", w),
+  attribution: (w: WindowCode) => get<Attribution | SnapshotAttribution>("/attribution", w),
   alerts: (w: WindowCode) => get<AlertFeed>("/alerts", w),
   scenario: async (req: ScenarioRequest): Promise<Scenario> => {
     const res = await fetch(`${BASE}/scenario`, {

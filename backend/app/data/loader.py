@@ -67,6 +67,16 @@ class MarketData:
             return float(self.fx_rates.loc[on, currency])
         return 1.0
 
+    @property
+    def is_snapshot(self) -> bool:
+        """True when the price data is a single-day snapshot (no history).
+
+        In that mode the time-series metrics (volatility, beta, VaR, drawdown,
+        correlation, window/Brinson returns) cannot be computed from real data,
+        so the analytics fall back to snapshot-native views instead of faking a
+        history."""
+        return len(self.dates) <= 1
+
     # --- convenience views the analytics modules lean on -------------------
     def held_tickers(self) -> list[str]:
         return list(self.holdings["ticker"])

@@ -34,7 +34,8 @@ export function Shell({
             </h1>
             {meta?.has_data && (
               <span className="text-xs text-slate-300">
-                {meta.holdings_count} holdings · base {meta.base_currency} · as of {meta.as_of}
+                {meta.holdings_count} holdings · base {meta.base_currency}
+                {meta.benchmark ? ` · vs ${meta.benchmark}` : ""} · as of {meta.as_of}
               </span>
             )}
           </div>
@@ -43,6 +44,11 @@ export function Shell({
             {dq && !dq.ok && (
               <Pill tone="amber">{dq.count} data issue{dq.count === 1 ? "" : "s"} flagged</Pill>
             )}
+            {meta?.is_snapshot ? (
+              <span className="rounded-md bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10">
+                Snapshot · {meta.as_of}
+              </span>
+            ) : (
             <div className="flex items-center gap-1 rounded-lg bg-white/10 p-1 ring-1 ring-white/10">
               {windows.map((w) => (
                 <button
@@ -58,6 +64,7 @@ export function Shell({
                 </button>
               ))}
             </div>
+            )}
             <button
               onClick={() => globalThis.print()}
               className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-light"

@@ -27,7 +27,7 @@ function MoverRow({ h }: { h: ScenarioHolding }) {
   );
 }
 
-export function ScenarioSection({ sectors }: { sectors: string[] }) {
+export function ScenarioSection({ sectors, isSnapshot = false }: { sectors: string[]; isSnapshot?: boolean }) {
   const [market, setMarket] = useState(0);
   const [sectorShocks, setSectorShocks] = useState<Pct>({});
   const [fxShocks, setFxShocks] = useState<Pct>({});
@@ -101,7 +101,11 @@ export function ScenarioSection({ sectors }: { sectors: string[] }) {
               </button>
             ))}
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">Applied to each holding via its beta.</p>
+          <p className="mt-1 text-[11px] text-slate-400">
+            {isSnapshot
+              ? "Applied via assumed sector sensitivities (2× for leveraged ETFs)."
+              : "Applied to each holding via its beta."}
+          </p>
 
           <h3 className="mb-2 mt-5 text-xs font-semibold text-slate-500">Sector shocks (%)</h3>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
@@ -120,20 +124,24 @@ export function ScenarioSection({ sectors }: { sectors: string[] }) {
             ))}
           </div>
 
-          <h3 className="mb-2 mt-5 text-xs font-semibold text-slate-500">FX shocks vs USD (%)</h3>
-          <div className="flex gap-3">
-            {FX.map((c) => (
-              <label key={c} className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600">{c}</span>
-                <input
-                  type="number"
-                  value={fxShocks[c] ?? 0}
-                  onChange={(e) => setFxShocks((p) => ({ ...p, [c]: Number(e.target.value) }))}
-                  className="w-16 rounded border border-slate-200 px-2 py-1 text-right tabular"
-                />
-              </label>
-            ))}
-          </div>
+          {!isSnapshot && (
+            <>
+              <h3 className="mb-2 mt-5 text-xs font-semibold text-slate-500">FX shocks vs USD (%)</h3>
+              <div className="flex gap-3">
+                {FX.map((c) => (
+                  <label key={c} className="flex items-center gap-2 text-sm">
+                    <span className="text-slate-600">{c}</span>
+                    <input
+                      type="number"
+                      value={fxShocks[c] ?? 0}
+                      onChange={(e) => setFxShocks((p) => ({ ...p, [c]: Number(e.target.value) }))}
+                      className="w-16 rounded border border-slate-200 px-2 py-1 text-right tabular"
+                    />
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Results */}

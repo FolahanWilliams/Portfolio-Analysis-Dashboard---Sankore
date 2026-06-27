@@ -11,12 +11,15 @@ export interface DataQuality {
 
 export interface Meta {
   has_data: boolean;
+  is_snapshot?: boolean;
   windows: WindowCode[];
   default_window: WindowCode;
   as_of: string;
   inception: string;
   holdings_count: number;
   base_currency: string;
+  benchmark?: string;
+  provenance?: string | null;
   sectors: string[];
   regions: string[];
   data_quality: DataQuality;
@@ -31,18 +34,49 @@ export interface Contribution {
 }
 
 export interface Summary {
+  mode?: string;
   window: WindowCode;
   as_of: string;
   base_currency: string;
   aum: number;
+  cost_basis?: number;
   pnl: { unrealised: number; realised: number; total: number };
   total_return: number;
-  benchmark_return: number;
-  active_return: number;
+  benchmark_return: number | null;
+  active_return: number | null;
   holdings_count: number;
+  positions_at_loss?: number;
   top_contributors: Contribution[];
   top_detractors: Contribution[];
   truncated: boolean;
+  data_quality: DataQuality;
+}
+
+export interface SnapshotRisk {
+  mode: "snapshot";
+  as_of: string;
+  positions: number;
+  positions_at_loss: number;
+  hhi: number;
+  effective_n: number;
+  largest_weight: { ticker: string; weight: number };
+  top5_weight: number;
+  top10_weight: number;
+  largest_sector: { sector: string; weight: number };
+  assumed_beta: number;
+  unrealised_return: number;
+  best: { ticker: string; return: number };
+  worst: { ticker: string; return: number };
+  loss_makers: { ticker: string; return: number; value_change: number }[];
+  data_quality: DataQuality;
+}
+
+export interface SnapshotAttribution {
+  mode: "snapshot";
+  as_of: string;
+  total_return: number;
+  security_contribution: SecurityContribution[];
+  sector_contribution: { sector: string; contribution: number }[];
   data_quality: DataQuality;
 }
 

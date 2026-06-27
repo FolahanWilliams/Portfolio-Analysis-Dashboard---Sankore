@@ -33,6 +33,15 @@ export default function App() {
         </div>
       )}
 
+      {meta?.provenance && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-brand/20 bg-blue-50/60 px-4 py-3">
+          <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-brand" />
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold text-navy">Static snapshot.</span> {meta.provenance}
+          </p>
+        </div>
+      )}
+
       <div className="space-y-6">
         {/* Portfolio Summary spans the top -- the three core answers, no scroll */}
         <SummarySection window={window} />
@@ -52,7 +61,7 @@ export default function App() {
             <AlertsSection window={window} />
           </div>
           <div className="xl:col-span-2">
-            <ScenarioSection sectors={meta?.sectors ?? []} />
+            <ScenarioSection sectors={meta?.sectors ?? []} isSnapshot={!!meta?.is_snapshot} />
           </div>
         </div>
       </div>

@@ -30,6 +30,7 @@ from app.analytics.risk import compute_risk
 from app.analytics.attribution import compute_attribution
 from app.analytics.alerts import compute_alerts
 from app.analytics.scenario import apply_scenario
+from app.analytics import snapshot as snap
 from app.models.schemas import Window
 
 app = FastAPI(
@@ -98,12 +99,22 @@ def meta():
         return {"has_data": False, "windows": SUPPORTED_WINDOWS}
     return {
         "has_data": True,
+        "is_snapshot": md.is_snapshot,
         "windows": SUPPORTED_WINDOWS,
         "default_window": DEFAULT_WINDOW,
         "as_of": md.dates[-1].date().isoformat(),
         "inception": md.dates[0].date().isoformat(),
         "holdings_count": int(len(md.holdings)),
         "base_currency": "USD",
+        "benchmark": "Nasdaq-100 (proxy)",
+        "provenance": (
+            "Static snapshot — holdings, weights, exposure, concentration and "
+            "P&L are computed directly from the GEF MCB monitor as of "
+            f"{md.dates[-1].date().isoformat()}. With only one day of prices, "
+            "statistical risk (volatility, beta, VaR, drawdown, correlation) and "
+            "time-window/Brinson returns are not shown — they populate "
+            "automatically once a price history is captured."
+        ) if md.is_snapshot else None,
         "sectors": sorted(md.holdings["sector"].unique().tolist()),
         "regions": sorted(md.holdings["region"].unique().tolist()),
         "data_quality": md.report.as_dict(),
@@ -121,7 +132,8 @@ def summary(window: Window = Query(default=Window(DEFAULT_WINDOW))):
     md, w = _load_and_resolve(window.value)
     if w is None:
         return _empty_response()
-    return _respond(compute_summary(md, w), md)
+    out = snap.snapshot_summary(md) if md.is_snapshot else compute_summary(md, w)
+    return _respond(out, md)
 
 
 @app.get("/exposure")
@@ -129,6 +141,7 @@ def exposure(window: Window = Query(default=Window(DEFAULT_WINDOW))):
     md, w = _load_and_resolve(window.value)
     if w is None:
         return _empty_response()
+    # Exposure is time-series-free, so it works unchanged in either mode.
     return _respond(compute_exposure(md, w), md)
 
 
@@ -137,7 +150,8 @@ def risk(window: Window = Query(default=Window(DEFAULT_WINDOW))):
     md, w = _load_and_resolve(window.value)
     if w is None:
         return _empty_response()
-    return _respond(compute_risk(md, w), md)
+    out = snap.snapshot_risk(md) if md.is_snapshot else compute_risk(md, w)
+    return _respond(out, md)
 
 
 @app.get("/attribution")
@@ -145,7 +159,8 @@ def attribution(window: Window = Query(default=Window(DEFAULT_WINDOW))):
     md, w = _load_and_resolve(window.value)
     if w is None:
         return _empty_response()
-    return _respond(compute_attribution(md, w), md)
+    out = snap.snapshot_attribution(md) if md.is_snapshot else compute_attribution(md, w)
+    return _respond(out, md)
 
 
 @app.get("/alerts")
@@ -153,7 +168,11 @@ def alerts(window: Window = Query(default=Window(DEFAULT_WINDOW))):
     md, w = _load_and_resolve(window.value)
     if w is None:
         return _empty_response()
-    return _respond(compute_alerts(md, w), md)
+    if md.is_snapshot:
+        out = snap.snapshot_alerts(md, compute_exposure(md, w))
+    else:
+        out = compute_alerts(md, w)
+    return _respond(out, md)
 
 
 @app.post("/scenario")
@@ -161,5 +180,8 @@ def scenario(req: ScenarioRequest):
     md = load_market_data()
     if len(md.dates) == 0:
         return _empty_response()
-    result = apply_scenario(md, req.market, req.sector_shocks, req.fx_shocks)
+    if md.is_snapshot:
+        result = snap.snapshot_scenario(md, req.market, req.sector_shocks, req.fx_shocks)
+    else:
+        result = apply_scenario(md, req.market, req.sector_shocks, req.fx_shocks)
     return _respond(result, md)
