@@ -58,12 +58,13 @@ export function HoldingsSection({
           <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur">
             <tr className="border-b border-slate-200 text-left">
               <Th label="Stock" k="ticker" className="text-left" />
-              <Th label="Shares" className="text-right" />
+              <Th label="Units" className="text-right" />
               <Th label="Bought" className="text-right" />
               <Th label="Current" className="text-right" />
-              <Th label="Change" k="unrealised_return" className="text-right" />
+              <Th label="Cost basis" className="text-right" />
               <Th label="Market value" className="text-right" />
-              <Th label="Unrealised P&L" className="text-right" />
+              <Th label="Gain $" className="text-right" />
+              <Th label="Gain % / Return" k="unrealised_return" className="text-right" />
               <Th label="Weight" k="weight" className="text-right" />
             </tr>
           </thead>
@@ -79,11 +80,12 @@ export function HoldingsSection({
                 <td className="px-3 py-2 text-right tabular text-slate-600">{fmtNum(h.shares, 0)}</td>
                 <td className="px-3 py-2 text-right tabular text-slate-500">{fmtPrice(h.cost_price, h.currency)}</td>
                 <td className="px-3 py-2 text-right tabular font-medium text-navy">{fmtPrice(h.current_price, h.currency)}</td>
+                <td className="px-3 py-2 text-right tabular text-slate-500">{fmtMoney(h.cost_value)}</td>
+                <td className="px-3 py-2 text-right tabular text-slate-700">{fmtMoney(h.market_value)}</td>
+                <td className={`px-3 py-2 text-right tabular ${signClass(h.unrealised_pnl)}`}>{fmtMoney(h.unrealised_pnl)}</td>
                 <td className={`px-3 py-2 text-right tabular font-medium ${signClass(h.unrealised_return)}`}>
                   {fmtSignedPct(h.unrealised_return)}
                 </td>
-                <td className="px-3 py-2 text-right tabular text-slate-700">{fmtMoney(h.market_value)}</td>
-                <td className={`px-3 py-2 text-right tabular ${signClass(h.unrealised_pnl)}`}>{fmtMoney(h.unrealised_pnl)}</td>
                 <td className="px-3 py-2 text-right tabular text-slate-600">{fmtNum((h.weight ?? 0) * 100, 1)}%</td>
               </tr>
             ))}

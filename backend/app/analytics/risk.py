@@ -38,6 +38,17 @@ def compute_risk(md: MarketData, w: WindowSlice) -> dict:
     volatility = sigma_daily * ann
     ann_return = mu_daily * TRADING_DAYS_PER_YEAR
 
+    # Benchmark (S&P 500) stats over the same window.
+    bench_mu = float(bench_ret.mean()) if len(bench_ret) else 0.0
+    bench_sigma = float(bench_ret.std(ddof=1)) if len(bench_ret) > 1 else 0.0
+    bench_vol = bench_sigma * ann
+    bench_ann_return = bench_mu * TRADING_DAYS_PER_YEAR
+
+    # Cumulative (inception-to-date) returns, portfolio vs S&P 500.
+    port_cum = float(pv.loc[w.end_date] / pv.loc[w.base_date] - 1.0)
+    bench_cum = float(bench.loc[w.end_date] / bench.loc[w.base_date] - 1.0)
+    excess_return = port_cum - bench_cum  # "extra above the market"
+
     # Beta vs benchmark (aligned daily returns within the window).
     aligned = pd.concat([port_ret, bench_ret], axis=1, keys=["p", "b"]).dropna()
     if len(aligned) > 1 and aligned["b"].var(ddof=1) > 0:
@@ -45,6 +56,13 @@ def compute_risk(md: MarketData, w: WindowSlice) -> dict:
         beta = cov / float(aligned["b"].var(ddof=1))
     else:
         beta = float("nan")
+
+    # Jensen's alpha (annualised, CAPM): the return earned above what beta-times-
+    # market exposure alone would predict, net of the risk-free rate.
+    if np.isfinite(beta):
+        alpha = ann_return - (RISK_FREE_RATE + beta * (bench_ann_return - RISK_FREE_RATE))
+    else:
+        alpha = float("nan")
 
     sharpe = (ann_return - RISK_FREE_RATE) / volatility if volatility > 0 else float("nan")
 
@@ -78,10 +96,18 @@ def compute_risk(md: MarketData, w: WindowSlice) -> dict:
         "volatility": volatility,
         "annualised_return": ann_return,
         "beta": beta,
+        "alpha": alpha,
         "sharpe": sharpe,
         "max_drawdown": _max_drawdown(pv_window),
         "var": var,
         "risk_free_rate": RISK_FREE_RATE,
         "correlation": correlation,
+        "benchmark_name": "S&P 500",
+        "portfolio_return": port_cum,
+        "benchmark_return": bench_cum,
+        "excess_return": excess_return,
+        "benchmark_volatility": bench_vol,
+        "benchmark_annualised_return": bench_ann_return,
+        "inception": w.base_date.date().isoformat(),
         "truncated": w.truncated,
     }

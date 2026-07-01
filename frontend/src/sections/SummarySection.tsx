@@ -36,43 +36,39 @@ export function SummarySection({ window, live = false, refreshTick = 0 }: { wind
   if (error) return <Card title="Portfolio Summary"><ErrorState message={error} /></Card>;
   if (!data) return <Card title="Portfolio Summary"><EmptyState message="No data" /></Card>;
 
-  const snapshot = data.mode === "snapshot";
   return (
     <Card
       title="Portfolio Summary"
-      subtitle={`As of ${data.as_of} · base ${data.base_currency}`}
+      subtitle={`Inception-to-date · as of ${data.as_of} · base ${data.base_currency}`}
       right={<TruncatedNote when={data.truncated} />}
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="AUM" value={fmtMoney(data.aum)} tone="value" />
         <StatTile
-          label={snapshot ? "Return (since cost)" : `Total return (${data.window})`}
-          value={<span className={signClass(data.total_return)}>{fmtSignedPct(data.total_return)}</span>}
-          sub={
-            data.benchmark_return != null
-              ? <span className="text-slate-400">Benchmark {fmtSignedPct(data.benchmark_return)}</span>
-              : data.cost_basis != null
-                ? <span className="text-slate-400">Cost {fmtMoney(data.cost_basis)}</span>
-                : undefined
-          }
+          label="Market value (AUM)"
+          value={fmtMoney(data.aum)}
+          tone="value"
+          sub={data.cost_basis != null ? <span className="text-slate-400">Cost {fmtMoney(data.cost_basis)}</span> : undefined}
         />
-        {snapshot ? (
-          <StatTile
-            label="Positions at a loss"
-            value={`${data.positions_at_loss ?? 0} / ${data.holdings_count}`}
-          />
-        ) : (
-          <StatTile
-            label="Active vs benchmark"
-            value={<span className={signClass(data.active_return)}>{fmtSignedPct(data.active_return)}</span>}
-          />
-        )}
+        <StatTile
+          label="Return since purchase"
+          value={<span className={signClass(data.total_return)}>{fmtSignedPct(data.total_return)}</span>}
+          sub={<span className="text-slate-400">gain$ ÷ cost basis</span>}
+        />
+        <StatTile
+          label="Positions at a loss"
+          value={`${data.positions_at_loss ?? 0} / ${data.holdings_count}`}
+        />
         <StatTile
           label="Unrealised P&L"
           value={<span className={signClass(data.pnl.unrealised)}>{fmtMoney(data.pnl.unrealised)}</span>}
           sub={<span className="text-slate-400">Realised {fmtMoney(data.pnl.realised)}</span>}
         />
       </div>
+
+      <p className="mt-3 text-[11px] text-slate-400">
+        AUM is the equity market value from the holdings sheet ($252,672); weights shown are % of equity.
+        No separate cash line is included — the sheet's total-fund “% Weight” column was internally inconsistent, so it is not used.
+      </p>
 
       <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div>

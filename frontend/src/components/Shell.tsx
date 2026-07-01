@@ -65,22 +65,26 @@ export function Shell({
               <span className="rounded-md bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10">
                 Snapshot · {meta.as_of}
               </span>
+            ) : windows.length > 1 ? (
+              <div className="flex items-center gap-1 rounded-lg bg-white/10 p-1 ring-1 ring-white/10">
+                {windows.map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => onWindow(w)}
+                    className={`rounded-md px-3 py-1 text-sm font-medium transition ${
+                      w === window
+                        ? "bg-white text-navy shadow-sm"
+                        : "text-slate-200 hover:bg-white/10"
+                    }`}
+                  >
+                    {WINDOW_LABELS[w]}
+                  </button>
+                ))}
+              </div>
             ) : (
-            <div className="flex items-center gap-1 rounded-lg bg-white/10 p-1 ring-1 ring-white/10">
-              {windows.map((w) => (
-                <button
-                  key={w}
-                  onClick={() => onWindow(w)}
-                  className={`rounded-md px-3 py-1 text-sm font-medium transition ${
-                    w === window
-                      ? "bg-white text-navy shadow-sm"
-                      : "text-slate-200 hover:bg-white/10"
-                  }`}
-                >
-                  {WINDOW_LABELS[w]}
-                </button>
-              ))}
-            </div>
+              <span className="rounded-md bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-white/10">
+                Inception-to-date
+              </span>
             )}
             {!meta?.is_snapshot && onRefresh && (
               <button

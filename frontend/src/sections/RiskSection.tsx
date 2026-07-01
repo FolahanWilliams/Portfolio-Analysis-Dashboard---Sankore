@@ -88,19 +88,50 @@ export function RiskSection({ window, live = false, refreshTick = 0 }: { window:
 
   return (
     <Card
-      title="Risk Metrics"
-      subtitle={`As of ${d.as_of} · ${d.observations} obs · rf ${fmtPct(d.risk_free_rate, 1)}`}
+      title="Performance & Risk vs S&P 500"
+      subtitle={`Inception-to-date (${d.inception} → ${d.as_of}) · benchmark ${d.benchmark_name} · rf ${fmtPct(d.risk_free_rate, 1)}`}
       right={<TruncatedNote when={d.truncated} />}
     >
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Volatility (ann.)" value={fmtPct(d.volatility, 1)} tone="value" />
+      {/* Headline: portfolio vs S&P 500 over the full price history */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <StatTile
+          label="Portfolio return"
+          value={<span className={signClass(d.portfolio_return)}>{fmtSignedPct(d.portfolio_return, 1)}</span>}
+          tone="value"
+        />
+        <StatTile
+          label={`${d.benchmark_name} return`}
+          value={<span className={signClass(d.benchmark_return)}>{fmtSignedPct(d.benchmark_return, 1)}</span>}
+        />
+        <StatTile
+          label="Excess (above market)"
+          value={<span className={signClass(d.excess_return)}>{fmtSignedPct(d.excess_return, 1)}</span>}
+        />
+        <StatTile
+          label="Alpha (ann., CAPM)"
+          value={<span className={signClass(d.alpha)}>{fmtSignedPct(d.alpha, 1)}</span>}
+        />
         <StatTile label="Beta" value={fmtNum(d.beta, 2)} />
+        <StatTile
+          label="Volatility (ann.)"
+          value={fmtPct(d.volatility, 1)}
+          sub={<span className="text-slate-400">S&P {fmtPct(d.benchmark_volatility, 1)}</span>}
+        />
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile
           label="Sharpe"
           value={<span className={signClass(d.sharpe)}>{fmtNum(d.sharpe, 2)}</span>}
         />
         <StatTile label="Max drawdown" value={<span className="text-negative">{fmtPct(d.max_drawdown, 1)}</span>} />
+        <StatTile label="Observations" value={fmtNum(d.observations, 0)} />
+        <StatTile label="Risk-free" value={fmtPct(d.risk_free_rate, 1)} />
       </div>
+      <p className="mt-2 text-[11px] text-slate-400">
+        Beta, alpha, volatility and the return comparison measure the <em>current</em> holdings across the full price
+        history since {d.inception} vs the {d.benchmark_name} — the like-for-like basis for risk. This is distinct from the
+        book’s gain since the positions were actually purchased (the “Return since purchase” in Portfolio Summary).
+      </p>
 
       <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div>

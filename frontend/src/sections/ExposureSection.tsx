@@ -2,7 +2,6 @@ import {
   Bar,
   BarChart,
   Cell,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -13,26 +12,24 @@ import { useApi } from "../lib/useApi";
 import type { GroupWeight, WindowCode } from "../types/api";
 import { Card, EmptyState, ErrorState, Loading, StatTile } from "../components/ui";
 import { Matrix } from "../components/Matrix";
-import { fmtNum, fmtPct, fmtSignedPct, heatBlue, signClass } from "../lib/format";
+import { fmtNum, fmtPct, heatBlue } from "../lib/format";
 
-function ActiveWeightChart({ rows, keyField }: { rows: GroupWeight[]; keyField: "sector" | "region" }) {
-  const data = rows.map((r) => ({
-    name: (r[keyField] as string) ?? "",
-    active: r.active,
-  }));
-  const max = Math.max(0.01, ...data.map((d) => Math.abs(d.active)));
+function WeightChart({ rows, keyField }: { rows: GroupWeight[]; keyField: "sector" | "region" }) {
+  const data = [...rows]
+    .sort((a, b) => b.portfolio - a.portfolio)
+    .map((r) => ({ name: (r[keyField] as string) ?? "", weight: r.portfolio }));
+  const max = Math.max(0.01, ...data.map((d) => d.weight));
   return (
-    <ResponsiveContainer width="100%" height={Math.max(120, data.length * 34)}>
-      <BarChart data={data} layout="vertical" margin={{ left: 10, right: 24, top: 4, bottom: 4 }}>
-        <XAxis type="number" domain={[-max * 1.15, max * 1.15]} tickFormatter={(v) => fmtPct(v, 0)}
+    <ResponsiveContainer width="100%" height={Math.max(120, data.length * 30)}>
+      <BarChart data={data} layout="vertical" margin={{ left: 10, right: 44, top: 4, bottom: 4 }}>
+        <XAxis type="number" domain={[0, max * 1.1]} tickFormatter={(v) => fmtPct(v, 0)}
           tick={{ fontSize: 11, fill: "#94a3b8" }} />
-        <YAxis type="category" dataKey="name" width={96} tick={{ fontSize: 12, fill: "#475569" }} />
-        <Tooltip formatter={(v: number) => [fmtSignedPct(v), "Active weight"]}
+        <YAxis type="category" dataKey="name" width={116} tick={{ fontSize: 12, fill: "#475569" }} />
+        <Tooltip formatter={(v: number) => [fmtPct(v, 1), "Weight"]}
           contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-        <ReferenceLine x={0} stroke="#cbd5e1" />
-        <Bar dataKey="active" radius={3} isAnimationActive={false}>
-          {data.map((d, i) => (
-            <Cell key={i} fill={d.active >= 0 ? "#059669" : "#dc2626"} />
+        <Bar dataKey="weight" radius={3} isAnimationActive={false}>
+          {data.map((_, i) => (
+            <Cell key={i} fill="#2563eb" />
           ))}
         </Bar>
       </BarChart>
@@ -47,9 +44,7 @@ function WeightTable({ rows, keyField }: { rows: GroupWeight[]; keyField: "secto
       <thead>
         <tr className="text-[11px] uppercase tracking-wide text-slate-400">
           <th className="py-1 text-left font-medium capitalize">{keyField}</th>
-          <th className="py-1 text-right font-medium">Portfolio</th>
-          <th className="py-1 text-right font-medium">Benchmark</th>
-          <th className="py-1 text-right font-medium">+/- vs bench</th>
+          <th className="py-1 text-right font-medium">Weight</th>
         </tr>
       </thead>
       <tbody>
@@ -57,27 +52,10 @@ function WeightTable({ rows, keyField }: { rows: GroupWeight[]; keyField: "secto
           <tr key={(r[keyField] as string) ?? ""} className="border-t border-slate-50">
             <td className="py-1.5 font-medium text-slate-700">{r[keyField]}</td>
             <td className="py-1.5 text-right tabular text-slate-600">{fmtPct(r.portfolio, 1)}</td>
-            <td className="py-1.5 text-right tabular text-slate-500">{fmtPct(r.benchmark, 1)}</td>
-            <td className={`py-1.5 text-right tabular font-medium ${signClass(r.active)}`}>
-              {fmtSignedPct(r.active, 1)}
-            </td>
           </tr>
         ))}
       </tbody>
     </table>
-  );
-}
-
-function Legend() {
-  return (
-    <div className="mb-2 flex items-center gap-4 text-[11px] text-slate-500">
-      <span className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "#059669" }} /> Overweight vs benchmark
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "#dc2626" }} /> Underweight
-      </span>
-    </div>
   );
 }
 
@@ -93,7 +71,7 @@ export function ExposureSection({ window, live = false, refreshTick = 0 }: { win
   return (
     <Card
       title="Sector & Geographic Exposure"
-      subtitle={`Where the fund's money sits, and how it tilts against the benchmark · as of ${data.as_of}`}
+      subtitle={`Where the fund's money sits · as of ${data.as_of}`}
     >
       <div className="grid grid-cols-3 gap-3">
         <StatTile
@@ -114,36 +92,35 @@ export function ExposureSection({ window, live = false, refreshTick = 0 }: { win
         />
       </div>
 
+      {/* By-sector breakdown on the left; sector x region map beside it on the right */}
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
           <h3 className="text-sm font-semibold text-navy">By sector</h3>
-          <p className="mb-2 text-xs text-slate-400">How much we hold vs the benchmark in each sector.</p>
-          <Legend />
-          <ActiveWeightChart rows={data.sector} keyField="sector" />
+          <p className="mb-2 text-xs text-slate-400">Share of the portfolio in each sector (largest first).</p>
+          <WeightChart rows={data.sector} keyField="sector" />
           <div className="mt-3"><WeightTable rows={data.sector} keyField="sector" /></div>
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-navy">By region</h3>
-          <p className="mb-2 text-xs text-slate-400">Geographic split of the portfolio vs the benchmark.</p>
-          <Legend />
-          <ActiveWeightChart rows={data.region} keyField="region" />
-          <div className="mt-3"><WeightTable rows={data.region} keyField="region" /></div>
+          <h3 className="text-sm font-semibold text-navy">Sector × region map</h3>
+          <p className="mb-2 text-xs text-slate-400">
+            % of the portfolio in each sector/region — darker means more money there.
+          </p>
+          <Matrix
+            rowHeader="Sector"
+            rowLabels={data.heatmap.sectors}
+            colLabels={data.heatmap.regions}
+            values={data.heatmap.values}
+            color={(v) => heatBlue(v, maxW)}
+            format={(v) => (v > 0 ? fmtPct(v, 1) : "·")}
+          />
         </div>
       </div>
 
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold text-navy">Sector × region map</h3>
-        <p className="mb-2 text-xs text-slate-400">
-          Share of the portfolio in each sector/region combination — darker means more money there.
-        </p>
-        <Matrix
-          rowHeader="Sector"
-          rowLabels={data.heatmap.sectors}
-          colLabels={data.heatmap.regions}
-          values={data.heatmap.values}
-          color={(v) => heatBlue(v, maxW)}
-          format={(v) => (v > 0 ? fmtPct(v, 1) : "·")}
-        />
+      <div className="mt-8 lg:w-1/2 lg:pr-4">
+        <h3 className="text-sm font-semibold text-navy">By region</h3>
+        <p className="mb-2 text-xs text-slate-400">Geographic split of the portfolio.</p>
+        <WeightChart rows={data.region} keyField="region" />
+        <div className="mt-3"><WeightTable rows={data.region} keyField="region" /></div>
       </div>
     </Card>
   );

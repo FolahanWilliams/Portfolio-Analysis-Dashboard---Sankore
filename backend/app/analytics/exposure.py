@@ -44,14 +44,13 @@ def compute_exposure(md: MarketData, w: WindowSlice) -> dict:
     sector_of = h["sector"]
     region_of = h["region"]
 
-    # Benchmark group weights straight from its constituent weights.
-    b = md.benchmark.set_index("ticker")
-    bench_w = b["weight"]
-
     port_sector = _group_weights(port_w, sector_of, "sector")
     port_region = _group_weights(port_w, region_of, "region")
-    bench_sector = _group_weights(bench_w, b["sector"], "sector")
-    bench_region = _group_weights(bench_w, b["region"], "region")
+    # The benchmark is the S&P 500 index (no per-sector constituent basket), so
+    # exposure is reported as the portfolio's own weights -- no active tilt.
+    empty = pd.Series(dtype=float)
+    bench_sector = empty
+    bench_region = empty
 
     # Concentration: HHI over individual holdings + effective number of names.
     hhi = float((port_w ** 2).sum())

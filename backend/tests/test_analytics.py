@@ -61,21 +61,24 @@ def test_holdings_prices_and_value_tie_out(md):
     assert sum(r["weight"] for r in h["holdings"]) == pytest.approx(1.0, rel=REL)
 
 
-def test_total_and_active_return(md):
+def test_total_return_is_cost_based_gain(md):
+    # Summary return is now inception-to-date, cost-based: (value - cost) / cost,
+    # matching the holdings sheet's Gain %.
     w = _w(md)
     out = compute_summary(md, w)
-    pv = md.portfolio_value_series()
-    manual = float(pv.loc[w.end_date]) / float(pv.loc[w.base_date]) - 1.0
-    assert out["total_return"] == pytest.approx(manual, rel=REL)
-    assert out["active_return"] == pytest.approx(
-        out["total_return"] - out["benchmark_return"], rel=REL)
+    h = md.holdings.set_index("ticker")
+    px = md.usd_prices.loc[w.end_date]
+    value = float((h["shares"] * px.reindex(h.index)).sum())
+    cost = float((h["shares"] * h["cost_basis"]).sum())
+    assert out["aum"] == pytest.approx(value, rel=REL)
+    assert out["cost_basis"] == pytest.approx(cost, rel=REL)
+    assert out["total_return"] == pytest.approx((value - cost) / cost, rel=REL)
+    assert out["active_return"] is None  # S&P 500 comparison lives on the risk panel
 
 
 def test_weights_sum_to_one(md):
     out = compute_exposure(md, _w(md))
     assert sum(r["portfolio"] for r in out["sector"]) == pytest.approx(1.0, rel=REL)
-    assert sum(r["benchmark"] for r in out["sector"]) == pytest.approx(1.0, rel=REL)
-    assert sum(r["active"] for r in out["sector"]) == pytest.approx(0.0, abs=1e-6)
 
 
 def test_volatility_matches_numpy(md):
@@ -103,11 +106,24 @@ def test_var_ordering_and_drawdown(md):
     assert 0.0 <= out["max_drawdown"] <= 1.0
 
 
-def test_brinson_reconciles_to_active_return(md):
+def test_attribution_contributions_sum_to_total_return(md):
+    # Security contributions (gain$ / total cost) sum to the book's total return,
+    # which equals the summary's cost-based total return.
     w = _w(md)
     attr = compute_attribution(md, w)
     summ = compute_summary(md, w)
-    assert attr["brinson_totals"]["total"] == pytest.approx(summ["active_return"], abs=5e-4)
+    csum = sum(r["contribution"] for r in attr["security_contribution"])
+    assert csum == pytest.approx(attr["total_return"], abs=5e-4)
+    assert attr["total_return"] == pytest.approx(summ["total_return"], abs=5e-4)
+
+
+def test_risk_benchmark_is_sp500(md):
+    # Beta/alpha/excess are measured against the S&P 500, inception-to-date.
+    out = compute_risk(md, _w(md))
+    assert out["benchmark_name"] == "S&P 500"
+    assert out["excess_return"] == pytest.approx(
+        out["portfolio_return"] - out["benchmark_return"], rel=REL)
+    assert out["alpha"] is not None and out["beta"] is not None
 
 
 def test_all_windows_resolve(md):

@@ -63,17 +63,6 @@ def compute_alerts(md: MarketData, w: WindowSlice) -> dict:
                 f"(limit {T['single_name_weight']*100:.0f}%).",
                 float(wt), T["single_name_weight"])
 
-    # --- Sector active weight ---------------------------------------------
-    for row in exp["sector"]:
-        active = abs(row["active"])
-        lvl = _level(active, T["sector_active_weight"])
-        if lvl:
-            direction = "overweight" if row["active"] > 0 else "underweight"
-            add(lvl, "Concentration", f"Sector active weight — {row['sector']}",
-                f"{row['sector']} is {abs(row['active'])*100:.1f}% {direction} vs "
-                f"benchmark (limit {T['sector_active_weight']*100:.0f}%).",
-                active, T["sector_active_weight"])
-
     # --- HHI concentration -------------------------------------------------
     hhi = exp["concentration"]["hhi"]
     add(_level(hhi, T["hhi"]), "Concentration", "Portfolio concentration (HHI)",

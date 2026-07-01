@@ -146,11 +146,19 @@ export interface Risk {
   volatility: number;
   annualised_return: number;
   beta: number | null;
+  alpha: number | null;
   sharpe: number | null;
   max_drawdown: number;
   var: Record<string, { historical: number; parametric: number }>;
   risk_free_rate: number;
   correlation: { tickers: string[]; matrix: number[][] };
+  benchmark_name: string;
+  portfolio_return: number;
+  benchmark_return: number;
+  excess_return: number;
+  benchmark_volatility: number;
+  benchmark_annualised_return: number;
+  inception: string;
   truncated: boolean;
   data_quality: DataQuality;
 }
@@ -239,17 +247,9 @@ export interface Scenario {
 export interface Attribution {
   window: WindowCode;
   as_of: string;
-  period_returns: PeriodReturn[];
+  total_return: number;
   security_contribution: SecurityContribution[];
   sector_contribution: { sector: string; contribution: number }[];
-  brinson: BrinsonRow[];
-  brinson_totals: {
-    allocation: number;
-    selection: number;
-    interaction: number;
-    total: number;
-  };
-  benchmark_return: number;
   truncated: boolean;
   data_quality: DataQuality;
 }

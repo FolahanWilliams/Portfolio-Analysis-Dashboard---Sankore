@@ -24,9 +24,11 @@ MOCK_DATA_DIR = os.environ.get(
     os.path.join(os.path.dirname(__file__), "mock_data"),
 )
 
-# Supported selectable windows for the dashboard (label -> meaning).
-SUPPORTED_WINDOWS = ["MTD", "QTD", "YTD", "1Y", "ALL"]
-DEFAULT_WINDOW = "YTD"
+# The dashboard reports a single period: inception-to-date (ALL). The multi-
+# window selector was removed at the boss's request -- every figure is measured
+# from the start of the price history to the latest date.
+SUPPORTED_WINDOWS = ["ALL"]
+DEFAULT_WINDOW = "ALL"
 
 # --- P1: rule-based alert thresholds ---------------------------------------
 # Each limit drives one rule in analytics/alerts.py. Tuned for the mock book so

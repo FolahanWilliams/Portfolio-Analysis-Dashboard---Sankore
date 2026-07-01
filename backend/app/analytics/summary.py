@@ -39,42 +39,28 @@ def compute_summary(md: MarketData, w: WindowSlice) -> dict:
     cost_usd = (h["cost_basis"].reindex(values_now.index)
                 * h["shares"].reindex(values_now.index)
                 * fx_now)
+    cost_total = float(cost_usd.sum())
     unrealised = float((values_now - cost_usd).sum())
     realised = float(h["realised_pnl"].fillna(0).sum())
 
-    # --- Returns over the window -------------------------------------------
-    pv = md.portfolio_value_series()
-    pv_base, pv_end = float(pv.loc[base]), float(pv.loc[end])
-    total_return = pv_end / pv_base - 1.0
+    # --- Return: inception-to-date, cost-based (matches the holdings sheet) --
+    # Simple return since purchase = (market value - cost basis) / cost basis.
+    total_return = unrealised / cost_total if cost_total else 0.0
 
-    # Benchmark return over the window: fixed (base-weight) basket return of its
-    # constituents -- the same definition attribution/Brinson uses, so active
-    # return and the Brinson total reconcile exactly.
-    b = md.benchmark.set_index("ticker")
-    bt = [t for t in b.index if t in md.usd_prices.columns]
-    bw = b["weight"].reindex(bt).to_numpy(dtype=float)
-    bw = bw / bw.sum() if bw.sum() else bw
-    p_b = md.usd_prices.loc[base, bt].to_numpy(dtype=float)
-    p_e = md.usd_prices.loc[end, bt].to_numpy(dtype=float)
-    bench_return = float((bw * (p_e / p_b - 1.0)).sum())
-    active_return = total_return - bench_return
-
-    # --- Contribution by holding over the window ---------------------------
-    px_base = md.usd_prices.loc[base]
+    # Benchmark (S&P 500) comparison lives on the Performance & Risk panel, on a
+    # like-for-like time-series basis; the summary reports the book's own P&L.
+    # --- Contribution by holding: gain$ / total cost (sums to total_return) --
     contribs = []
-    w_base_total = float((md.holdings.set_index("ticker")["shares"] * px_base).reindex(values_now.index).sum())
     for tkr in values_now.index:
-        shares = float(h.loc[tkr, "shares"])
-        v_base = shares * float(px_base[tkr])
         v_end = float(values_now[tkr])
-        ret = v_end / v_base - 1.0 if v_base else 0.0
-        weight_base = v_base / w_base_total if w_base_total else 0.0
+        c = float(cost_usd[tkr])
+        gain = v_end - c
         contribs.append({
             "ticker": tkr,
             "name": str(h.loc[tkr, "name"]),
-            "weight": weight_base,
-            "return": ret,
-            "contribution": weight_base * ret,
+            "weight": v_end / aum if aum else 0.0,
+            "return": gain / c if c else 0.0,
+            "contribution": gain / cost_total if cost_total else 0.0,
         })
     contribs.sort(key=lambda r: r["contribution"], reverse=True)
     top = contribs[:5]
@@ -85,14 +71,16 @@ def compute_summary(md: MarketData, w: WindowSlice) -> dict:
         "as_of": end.date().isoformat(),
         "base_currency": "USD",
         "aum": aum,
+        "cost_basis": cost_total,
+        "positions_at_loss": int((values_now - cost_usd < 0).sum()),
         "pnl": {
             "unrealised": unrealised,
             "realised": realised,
             "total": unrealised + realised,
         },
         "total_return": total_return,
-        "benchmark_return": bench_return,
-        "active_return": active_return,
+        "benchmark_return": None,
+        "active_return": None,
         "holdings_count": int(len(values_now)),
         "top_contributors": top,
         "top_detractors": bottom,

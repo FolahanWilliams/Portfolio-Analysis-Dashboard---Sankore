@@ -117,7 +117,7 @@ def meta(live: bool = Query(False, description="Refresh prices from Yahoo Financ
         "inception": md.dates[0].date().isoformat(),
         "holdings_count": int(len(md.holdings)),
         "base_currency": "USD",
-        "benchmark": "Nasdaq-100 (proxy)",
+        "benchmark": "S&P 500",
         "price_source": "snapshot" if md.is_snapshot else "Yahoo Finance",
         "live": info,
         "provenance": (
