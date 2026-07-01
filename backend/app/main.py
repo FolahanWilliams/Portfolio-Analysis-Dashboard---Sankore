@@ -107,6 +107,7 @@ def meta():
         "holdings_count": int(len(md.holdings)),
         "base_currency": "USD",
         "benchmark": "Nasdaq-100 (proxy)",
+        "price_source": "snapshot" if md.is_snapshot else "Yahoo Finance",
         "provenance": (
             "Static snapshot — holdings, weights, exposure, concentration and "
             "P&L are computed directly from the GEF MCB monitor as of "

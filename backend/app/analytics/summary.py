@@ -47,8 +47,16 @@ def compute_summary(md: MarketData, w: WindowSlice) -> dict:
     pv_base, pv_end = float(pv.loc[base]), float(pv.loc[end])
     total_return = pv_end / pv_base - 1.0
 
-    bench = md.benchmark_index_series()
-    bench_return = float(bench.loc[end]) / float(bench.loc[base]) - 1.0
+    # Benchmark return over the window: fixed (base-weight) basket return of its
+    # constituents -- the same definition attribution/Brinson uses, so active
+    # return and the Brinson total reconcile exactly.
+    b = md.benchmark.set_index("ticker")
+    bt = [t for t in b.index if t in md.usd_prices.columns]
+    bw = b["weight"].reindex(bt).to_numpy(dtype=float)
+    bw = bw / bw.sum() if bw.sum() else bw
+    p_b = md.usd_prices.loc[base, bt].to_numpy(dtype=float)
+    p_e = md.usd_prices.loc[end, bt].to_numpy(dtype=float)
+    bench_return = float((bw * (p_e / p_b - 1.0)).sum())
     active_return = total_return - bench_return
 
     # --- Contribution by holding over the window ---------------------------

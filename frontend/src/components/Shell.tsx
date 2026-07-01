@@ -36,6 +36,7 @@ export function Shell({
               <span className="text-xs text-slate-300">
                 {meta.holdings_count} holdings · base {meta.base_currency}
                 {meta.benchmark ? ` · vs ${meta.benchmark}` : ""} · as of {meta.as_of}
+                {meta.price_source && meta.price_source !== "snapshot" ? ` · prices: ${meta.price_source}` : ""}
               </span>
             )}
           </div>

@@ -19,6 +19,7 @@ export interface Meta {
   holdings_count: number;
   base_currency: string;
   benchmark?: string;
+  price_source?: string;
   provenance?: string | null;
   sectors: string[];
   regions: string[];
