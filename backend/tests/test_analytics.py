@@ -18,6 +18,7 @@ from app.analytics.summary import compute_summary
 from app.analytics.exposure import compute_exposure
 from app.analytics.risk import compute_risk
 from app.analytics.attribution import compute_attribution
+from app.analytics.holdings import compute_holdings
 
 REL = 1e-3
 
@@ -44,6 +45,20 @@ def test_aum_matches_manual(md):
     px = md.usd_prices.loc[md.dates[-1]]
     manual = float((shares * px.reindex(shares.index)).sum())
     assert out["aum"] == pytest.approx(manual, rel=REL)
+
+
+def test_holdings_prices_and_value_tie_out(md):
+    h = compute_holdings(md)
+    # One row per position, and the market values reconcile to summary AUM.
+    assert h["holdings_count"] == len(md.holdings)
+    assert h["aum"] == pytest.approx(compute_summary(md, _w(md))["aum"], rel=REL)
+    for r in h["holdings"]:
+        # Each row exposes a current price and a bought price, and value = shares*price.
+        assert r["current_price"] > 0
+        assert r["cost_price"] > 0
+        assert r["market_value"] == pytest.approx(r["shares"] * r["current_price"], rel=REL)
+    # Weights sum to 1.
+    assert sum(r["weight"] for r in h["holdings"]) == pytest.approx(1.0, rel=REL)
 
 
 def test_total_and_active_return(md):

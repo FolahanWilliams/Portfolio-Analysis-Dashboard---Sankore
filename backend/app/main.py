@@ -30,6 +30,7 @@ from app.analytics.exposure import compute_exposure
 from app.analytics.risk import compute_risk
 from app.analytics.attribution import compute_attribution
 from app.analytics.alerts import compute_alerts
+from app.analytics.holdings import compute_holdings
 from app.analytics.scenario import apply_scenario
 from app.analytics import snapshot as snap
 from app.models.schemas import Window
@@ -149,6 +150,17 @@ def summary(
         return _empty_response()
     out = snap.snapshot_summary(md) if md.is_snapshot else compute_summary(md, w)
     return _respond(out, md, info)
+
+
+@app.get("/holdings")
+def holdings(
+    window: Window = Query(default=Window(DEFAULT_WINDOW)),
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, w, info = _load_and_resolve(window.value, live)
+    if w is None:
+        return _empty_response()
+    return _respond(compute_holdings(md), md, info)
 
 
 @app.get("/exposure")

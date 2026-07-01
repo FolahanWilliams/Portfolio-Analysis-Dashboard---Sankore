@@ -3,6 +3,7 @@ import { api } from "./api/client";
 import type { Meta, WindowCode } from "./types/api";
 import { Shell } from "./components/Shell";
 import { SummarySection } from "./sections/SummarySection";
+import { HoldingsSection } from "./sections/HoldingsSection";
 import { ExposureSection } from "./sections/ExposureSection";
 import { RiskSection } from "./sections/RiskSection";
 import { AttributionSection } from "./sections/AttributionSection";
@@ -71,14 +72,17 @@ export default function App() {
         {/* Portfolio Summary spans the top -- the three core answers, no scroll */}
         <SummarySection window={window} live={live} refreshTick={refreshTick} />
 
-        {/* Exposure + Risk side by side on wide screens */}
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <ExposureSection window={window} live={live} refreshTick={refreshTick} />
-          <RiskSection window={window} live={live} refreshTick={refreshTick} />
-        </div>
+        {/* What we own: bought price vs current price and P&L, per stock */}
+        <HoldingsSection window={window} live={live} refreshTick={refreshTick} />
 
-        {/* Attribution full width */}
+        {/* Sector & geographic exposure -- full width, its own panel */}
+        <ExposureSection window={window} live={live} refreshTick={refreshTick} />
+
+        {/* Performance attribution sits directly under exposure */}
         <AttributionSection window={window} live={live} refreshTick={refreshTick} />
+
+        {/* Risk metrics moved down, full width */}
+        <RiskSection window={window} live={live} refreshTick={refreshTick} />
 
         {/* P1 stretch: alerts (compact) + scenario analysis (wider) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">

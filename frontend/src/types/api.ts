@@ -36,6 +36,31 @@ export interface Meta {
   data_quality: DataQuality;
 }
 
+export interface Holding {
+  ticker: string;
+  name: string;
+  sector: string;
+  region: string;
+  currency: string;
+  shares: number;
+  cost_price: number | null;
+  current_price: number;
+  cost_value: number | null;
+  market_value: number;
+  unrealised_pnl: number | null;
+  unrealised_return: number | null;
+  weight: number;
+}
+
+export interface HoldingFeed {
+  as_of: string;
+  base_currency: string;
+  aum: number;
+  holdings_count: number;
+  holdings: Holding[];
+  data_quality: DataQuality;
+}
+
 export interface Contribution {
   ticker: string;
   name: string;

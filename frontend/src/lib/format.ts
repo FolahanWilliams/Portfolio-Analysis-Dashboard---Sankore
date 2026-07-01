@@ -39,6 +39,16 @@ export function fmtMoney(x: number | null | undefined, currency = "USD"): string
   })}${suffix}`;
 }
 
+// A share price -- always 2 dp with a $ sign (no k/m scaling).
+export function fmtPrice(x: number | null | undefined, currency = "USD"): string {
+  if (x === null || x === undefined || Number.isNaN(x)) return "--";
+  const sym = currency === "USD" ? "$" : "";
+  return `${x < 0 ? "-" : ""}${sym}${Math.abs(x).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 export function signClass(x: number | null | undefined): string {
   if (x === null || x === undefined || Number.isNaN(x)) return "text-slate-500";
   if (x > 0) return "text-positive";

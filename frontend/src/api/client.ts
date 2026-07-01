@@ -2,6 +2,7 @@ import type {
   AlertFeed,
   Attribution,
   Exposure,
+  HoldingFeed,
   Meta,
   Risk,
   Scenario,
@@ -43,6 +44,7 @@ export const api = {
     return (await res.json()) as Meta;
   },
   summary: (w: WindowCode, live = false) => get<Summary>("/summary", w, live),
+  holdings: (w: WindowCode, live = false) => get<HoldingFeed>("/holdings", w, live),
   exposure: (w: WindowCode, live = false) => get<Exposure>("/exposure", w, live),
   risk: (w: WindowCode, live = false) => get<Risk | SnapshotRisk>("/risk", w, live),
   attribution: (w: WindowCode, live = false) =>
