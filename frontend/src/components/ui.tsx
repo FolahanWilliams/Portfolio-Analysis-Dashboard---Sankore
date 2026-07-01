@@ -73,14 +73,14 @@ export function Delta({ value, text }: { value: number | null | undefined; text:
   return <span className={`tabular font-medium ${signClass(value)}`}>{text}</span>;
 }
 
-export function Pill({ children, tone = "slate" }: { children: ReactNode; tone?: string }) {
+export function Pill({ children, tone = "slate", title }: { children: ReactNode; tone?: string; title?: string }) {
   const tones: Record<string, string> = {
     slate: "bg-slate-100 text-slate-600",
     amber: "bg-amber-100 text-amber-700",
     blue: "bg-blue-50 text-brand",
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${tones[tone] ?? tones.slate}`}>
+    <span title={title} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${tones[tone] ?? tones.slate}`}>
       {children}
     </span>
   );

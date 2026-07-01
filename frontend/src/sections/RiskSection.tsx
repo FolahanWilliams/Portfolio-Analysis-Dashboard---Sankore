@@ -72,8 +72,8 @@ function SnapshotRiskView({ data }: { data: SnapshotRisk }) {
   );
 }
 
-export function RiskSection({ window }: { window: WindowCode }) {
-  const { data, loading, error } = useApi(() => api.risk(window), [window]);
+export function RiskSection({ window, live = false, refreshTick = 0 }: { window: WindowCode; live?: boolean; refreshTick?: number }) {
+  const { data, loading, error } = useApi(() => api.risk(window, live), [window, live, refreshTick]);
 
   if (loading) return <Card title="Risk Metrics"><Loading /></Card>;
   if (error) return <Card title="Risk Metrics"><ErrorState message={error} /></Card>;

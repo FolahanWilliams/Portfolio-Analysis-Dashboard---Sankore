@@ -27,7 +27,7 @@ function MoverRow({ h }: { h: ScenarioHolding }) {
   );
 }
 
-export function ScenarioSection({ sectors, isSnapshot = false }: { sectors: string[]; isSnapshot?: boolean }) {
+export function ScenarioSection({ sectors, isSnapshot = false, live = false, refreshTick = 0 }: { sectors: string[]; isSnapshot?: boolean; live?: boolean; refreshTick?: number }) {
   const [market, setMarket] = useState(0);
   const [sectorShocks, setSectorShocks] = useState<Pct>({});
   const [fxShocks, setFxShocks] = useState<Pct>({});
@@ -48,7 +48,7 @@ export function ScenarioSection({ sectors, isSnapshot = false }: { sectors: stri
         market: market / 100,
         sector_shocks: pctToFrac(sectorShocks),
         fx_shocks: pctToFrac(fxShocks),
-      })
+      }, live)
       .then((d) => alive && (setData(d), setError(null)))
       .catch((e) => alive && setError(e.message))
       .finally(() => alive && setLoading(false));
@@ -56,7 +56,7 @@ export function ScenarioSection({ sectors, isSnapshot = false }: { sectors: stri
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reqKey]);
+  }, [reqKey, live, refreshTick]);
 
   const reset = () => {
     setMarket(0);

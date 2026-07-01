@@ -67,8 +67,8 @@ function WeightTable({ rows, keyField }: { rows: GroupWeight[]; keyField: "secto
   );
 }
 
-export function ExposureSection({ window }: { window: WindowCode }) {
-  const { data, loading, error } = useApi(() => api.exposure(window), [window]);
+export function ExposureSection({ window, live = false, refreshTick = 0 }: { window: WindowCode; live?: boolean; refreshTick?: number }) {
+  const { data, loading, error } = useApi(() => api.exposure(window, live), [window, live, refreshTick]);
 
   if (loading) return <Card title="Sector & Geographic Exposure"><Loading /></Card>;
   if (error) return <Card title="Sector & Geographic Exposure"><ErrorState message={error} /></Card>;

@@ -14,15 +14,25 @@ export function Shell({
   meta,
   window,
   onWindow,
+  onRefresh,
+  refreshing = false,
+  live = false,
   children,
 }: {
   meta: Meta | null;
   window: WindowCode;
   onWindow: (w: WindowCode) => void;
+  onRefresh?: () => void;
+  refreshing?: boolean;
+  live?: boolean;
   children: ReactNode;
 }) {
   const windows = meta?.windows ?? (["MTD", "QTD", "YTD", "1Y", "ALL"] as WindowCode[]);
   const dq = meta?.data_quality;
+  const liveInfo = meta?.live ?? null;
+  // The refreshed-at time is a wall clock (e.g. 2026-07-01T11:52:02); show HH:MM.
+  const refreshedClock = liveInfo?.refreshed_at ? liveInfo.refreshed_at.slice(11, 16) : null;
+  const liveThrottled = live && liveInfo && liveInfo.ok === false;
 
   return (
     <div className="min-h-screen">
@@ -37,11 +47,17 @@ export function Shell({
                 {meta.holdings_count} holdings · base {meta.base_currency}
                 {meta.benchmark ? ` · vs ${meta.benchmark}` : ""} · as of {meta.as_of}
                 {meta.price_source && meta.price_source !== "snapshot" ? ` · prices: ${meta.price_source}` : ""}
+                {live && liveInfo?.ok && refreshedClock ? (
+                  <span className="ml-1 text-emerald-300">· live · refreshed {refreshedClock}</span>
+                ) : null}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-3 print:hidden">
+            {liveThrottled && (
+              <Pill tone="amber" title={liveInfo?.error}>Live prices unavailable — showing last committed</Pill>
+            )}
             {dq && !dq.ok && (
               <Pill tone="amber">{dq.count} data issue{dq.count === 1 ? "" : "s"} flagged</Pill>
             )}
@@ -65,6 +81,28 @@ export function Shell({
                 </button>
               ))}
             </div>
+            )}
+            {!meta?.is_snapshot && onRefresh && (
+              <button
+                onClick={onRefresh}
+                disabled={refreshing}
+                className="flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-white/15 transition hover:bg-white/20 disabled:cursor-wait disabled:opacity-70"
+                title="Pull the latest prices from Yahoo Finance and recompute every panel"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                  <path d="M21 3v6h-6" />
+                </svg>
+                {refreshing ? "Refreshing…" : "Refresh prices"}
+              </button>
             )}
             <button
               onClick={() => globalThis.print()}

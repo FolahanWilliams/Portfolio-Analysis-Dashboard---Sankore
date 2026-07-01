@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 
 from app.config import DEFAULT_WINDOW, SUPPORTED_WINDOWS
 from app.data.loader import load_market_data
+from app.data.live import get_live_market_data
 from app.analytics.windows import resolve_window
 from app.analytics.summary import compute_summary
 from app.analytics.exposure import compute_exposure
@@ -69,17 +70,26 @@ def _sanitize(obj):
     return obj
 
 
-def _respond(payload: dict, md) -> JSONResponse:
+def _respond(payload: dict, md, live_info: dict | None = None) -> JSONResponse:
     payload = dict(payload)
     payload["data_quality"] = md.report.as_dict()
+    if live_info is not None:
+        payload["live"] = live_info
     return JSONResponse(content=_sanitize(payload))
 
 
-def _load_and_resolve(window: str):
-    md = load_market_data()
+def _get_market_data(live: bool):
+    """Return (MarketData, live_info) — refreshed from Yahoo when live=True."""
+    if live:
+        return get_live_market_data()
+    return load_market_data(), None
+
+
+def _load_and_resolve(window: str, live: bool = False):
+    md, info = _get_market_data(live)
     if len(md.dates) == 0:
-        return md, None
-    return md, resolve_window(window, md.dates)
+        return md, None, info
+    return md, resolve_window(window, md.dates), info
 
 
 @app.get("/health")
@@ -93,8 +103,8 @@ def health():
 
 
 @app.get("/meta")
-def meta():
-    md = load_market_data()
+def meta(live: bool = Query(False, description="Refresh prices from Yahoo Finance")):
+    md, info = _get_market_data(live)
     if len(md.dates) == 0:
         return {"has_data": False, "windows": SUPPORTED_WINDOWS}
     return {
@@ -108,6 +118,7 @@ def meta():
         "base_currency": "USD",
         "benchmark": "Nasdaq-100 (proxy)",
         "price_source": "snapshot" if md.is_snapshot else "Yahoo Finance",
+        "live": info,
         "provenance": (
             "Static snapshot — holdings, weights, exposure, concentration and "
             "P&L are computed directly from the GEF MCB monitor as of "
@@ -129,60 +140,78 @@ def _empty_response():
 
 
 @app.get("/summary")
-def summary(window: Window = Query(default=Window(DEFAULT_WINDOW))):
-    md, w = _load_and_resolve(window.value)
+def summary(
+    window: Window = Query(default=Window(DEFAULT_WINDOW)),
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, w, info = _load_and_resolve(window.value, live)
     if w is None:
         return _empty_response()
     out = snap.snapshot_summary(md) if md.is_snapshot else compute_summary(md, w)
-    return _respond(out, md)
+    return _respond(out, md, info)
 
 
 @app.get("/exposure")
-def exposure(window: Window = Query(default=Window(DEFAULT_WINDOW))):
-    md, w = _load_and_resolve(window.value)
+def exposure(
+    window: Window = Query(default=Window(DEFAULT_WINDOW)),
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, w, info = _load_and_resolve(window.value, live)
     if w is None:
         return _empty_response()
     # Exposure is time-series-free, so it works unchanged in either mode.
-    return _respond(compute_exposure(md, w), md)
+    return _respond(compute_exposure(md, w), md, info)
 
 
 @app.get("/risk")
-def risk(window: Window = Query(default=Window(DEFAULT_WINDOW))):
-    md, w = _load_and_resolve(window.value)
+def risk(
+    window: Window = Query(default=Window(DEFAULT_WINDOW)),
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, w, info = _load_and_resolve(window.value, live)
     if w is None:
         return _empty_response()
     out = snap.snapshot_risk(md) if md.is_snapshot else compute_risk(md, w)
-    return _respond(out, md)
+    return _respond(out, md, info)
 
 
 @app.get("/attribution")
-def attribution(window: Window = Query(default=Window(DEFAULT_WINDOW))):
-    md, w = _load_and_resolve(window.value)
+def attribution(
+    window: Window = Query(default=Window(DEFAULT_WINDOW)),
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, w, info = _load_and_resolve(window.value, live)
     if w is None:
         return _empty_response()
     out = snap.snapshot_attribution(md) if md.is_snapshot else compute_attribution(md, w)
-    return _respond(out, md)
+    return _respond(out, md, info)
 
 
 @app.get("/alerts")
-def alerts(window: Window = Query(default=Window(DEFAULT_WINDOW))):
-    md, w = _load_and_resolve(window.value)
+def alerts(
+    window: Window = Query(default=Window(DEFAULT_WINDOW)),
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, w, info = _load_and_resolve(window.value, live)
     if w is None:
         return _empty_response()
     if md.is_snapshot:
         out = snap.snapshot_alerts(md, compute_exposure(md, w))
     else:
         out = compute_alerts(md, w)
-    return _respond(out, md)
+    return _respond(out, md, info)
 
 
 @app.post("/scenario")
-def scenario(req: ScenarioRequest):
-    md = load_market_data()
+def scenario(
+    req: ScenarioRequest,
+    live: bool = Query(False, description="Refresh prices from Yahoo Finance"),
+):
+    md, info = _get_market_data(live)
     if len(md.dates) == 0:
         return _empty_response()
     if md.is_snapshot:
         result = snap.snapshot_scenario(md, req.market, req.sector_shocks, req.fx_shocks)
     else:
         result = apply_scenario(md, req.market, req.sector_shocks, req.fx_shocks)
-    return _respond(result, md)
+    return _respond(result, md, info)

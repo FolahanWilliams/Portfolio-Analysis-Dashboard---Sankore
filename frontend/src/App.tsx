@@ -14,19 +14,44 @@ export default function App() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [metaError, setMetaError] = useState<string | null>(null);
   const [window, setWindow] = useState<WindowCode>("YTD");
+  // Live-price refresh. `live` flips on the first press and stays on; each press
+  // bumps `refreshTick` so every panel re-fetches even when live is already on.
+  const [live, setLive] = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
+    let alive = true;
     api
-      .meta()
+      .meta(live)
       .then((m) => {
+        if (!alive) return;
         setMeta(m);
-        if (m.default_window) setWindow(m.default_window);
+        if (refreshTick === 0 && m.default_window) setWindow(m.default_window);
       })
-      .catch((e) => setMetaError(e.message));
-  }, []);
+      .catch((e) => alive && setMetaError(e.message))
+      .finally(() => alive && setRefreshing(false));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTick]);
+
+  const handleRefresh = () => {
+    setLive(true);
+    setRefreshing(true);
+    setRefreshTick((t) => t + 1);
+  };
 
   return (
-    <Shell meta={meta} window={window} onWindow={setWindow}>
+    <Shell
+      meta={meta}
+      window={window}
+      onWindow={setWindow}
+      onRefresh={handleRefresh}
+      refreshing={refreshing}
+      live={live}
+    >
       {metaError && (
         <div className="mb-6">
           <ErrorState message={`${metaError}. Start the backend with: cd backend && uvicorn app.main:app --reload`} />
@@ -44,24 +69,29 @@ export default function App() {
 
       <div className="space-y-6">
         {/* Portfolio Summary spans the top -- the three core answers, no scroll */}
-        <SummarySection window={window} />
+        <SummarySection window={window} live={live} refreshTick={refreshTick} />
 
         {/* Exposure + Risk side by side on wide screens */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <ExposureSection window={window} />
-          <RiskSection window={window} />
+          <ExposureSection window={window} live={live} refreshTick={refreshTick} />
+          <RiskSection window={window} live={live} refreshTick={refreshTick} />
         </div>
 
         {/* Attribution full width */}
-        <AttributionSection window={window} />
+        <AttributionSection window={window} live={live} refreshTick={refreshTick} />
 
         {/* P1 stretch: alerts (compact) + scenario analysis (wider) */}
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="xl:col-span-1">
-            <AlertsSection window={window} />
+            <AlertsSection window={window} live={live} refreshTick={refreshTick} />
           </div>
           <div className="xl:col-span-2">
-            <ScenarioSection sectors={meta?.sectors ?? []} isSnapshot={!!meta?.is_snapshot} />
+            <ScenarioSection
+              sectors={meta?.sectors ?? []}
+              isSnapshot={!!meta?.is_snapshot}
+              live={live}
+              refreshTick={refreshTick}
+            />
           </div>
         </div>
       </div>

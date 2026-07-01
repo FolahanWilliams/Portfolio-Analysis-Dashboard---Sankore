@@ -22,8 +22,8 @@ export class ApiError extends Error {
   }
 }
 
-async function get<T>(path: string, window: WindowCode): Promise<T> {
-  const url = `${BASE}${path}?window=${window}`;
+async function get<T>(path: string, window: WindowCode, live = false): Promise<T> {
+  const url = `${BASE}${path}?window=${window}${live ? "&live=1" : ""}`;
   let res: Response;
   try {
     res = await fetch(url);
@@ -37,18 +37,19 @@ async function get<T>(path: string, window: WindowCode): Promise<T> {
 }
 
 export const api = {
-  meta: async (): Promise<Meta> => {
-    const res = await fetch(`${BASE}/meta`);
+  meta: async (live = false): Promise<Meta> => {
+    const res = await fetch(`${BASE}/meta${live ? "?live=1" : ""}`);
     if (!res.ok) throw new ApiError(res.status, "Failed to load metadata");
     return (await res.json()) as Meta;
   },
-  summary: (w: WindowCode) => get<Summary>("/summary", w),
-  exposure: (w: WindowCode) => get<Exposure>("/exposure", w),
-  risk: (w: WindowCode) => get<Risk | SnapshotRisk>("/risk", w),
-  attribution: (w: WindowCode) => get<Attribution | SnapshotAttribution>("/attribution", w),
-  alerts: (w: WindowCode) => get<AlertFeed>("/alerts", w),
-  scenario: async (req: ScenarioRequest): Promise<Scenario> => {
-    const res = await fetch(`${BASE}/scenario`, {
+  summary: (w: WindowCode, live = false) => get<Summary>("/summary", w, live),
+  exposure: (w: WindowCode, live = false) => get<Exposure>("/exposure", w, live),
+  risk: (w: WindowCode, live = false) => get<Risk | SnapshotRisk>("/risk", w, live),
+  attribution: (w: WindowCode, live = false) =>
+    get<Attribution | SnapshotAttribution>("/attribution", w, live),
+  alerts: (w: WindowCode, live = false) => get<AlertFeed>("/alerts", w, live),
+  scenario: async (req: ScenarioRequest, live = false): Promise<Scenario> => {
+    const res = await fetch(`${BASE}/scenario${live ? "?live=1" : ""}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),

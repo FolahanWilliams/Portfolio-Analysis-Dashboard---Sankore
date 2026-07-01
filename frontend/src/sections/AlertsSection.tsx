@@ -33,8 +33,8 @@ function AlertRow({ a }: { a: Alert }) {
   );
 }
 
-export function AlertsSection({ window }: { window: WindowCode }) {
-  const { data, loading, error } = useApi(() => api.alerts(window), [window]);
+export function AlertsSection({ window, live = false, refreshTick = 0 }: { window: WindowCode; live?: boolean; refreshTick?: number }) {
+  const { data, loading, error } = useApi(() => api.alerts(window, live), [window, live, refreshTick]);
 
   if (loading) return <Card title="Alerts"><Loading /></Card>;
   if (error) return <Card title="Alerts"><ErrorState message={error} /></Card>;

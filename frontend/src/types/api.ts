@@ -9,6 +9,15 @@ export interface DataQuality {
   issues: { source: string; reason: string; detail: string }[];
 }
 
+export interface LiveInfo {
+  ok: boolean;
+  updated: number;
+  failed: string[];
+  refreshed_at: string;
+  as_of: string;
+  error?: string;
+}
+
 export interface Meta {
   has_data: boolean;
   is_snapshot?: boolean;
@@ -21,6 +30,7 @@ export interface Meta {
   benchmark?: string;
   price_source?: string;
   provenance?: string | null;
+  live?: LiveInfo | null;
   sectors: string[];
   regions: string[];
   data_quality: DataQuality;

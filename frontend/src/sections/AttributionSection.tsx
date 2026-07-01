@@ -107,8 +107,8 @@ function SnapshotAttributionView({ data }: { data: SnapshotAttribution }) {
   );
 }
 
-export function AttributionSection({ window }: { window: WindowCode }) {
-  const { data, loading, error } = useApi(() => api.attribution(window), [window]);
+export function AttributionSection({ window, live = false, refreshTick = 0 }: { window: WindowCode; live?: boolean; refreshTick?: number }) {
+  const { data, loading, error } = useApi(() => api.attribution(window, live), [window, live, refreshTick]);
 
   if (loading) return <Card title="Performance Attribution"><Loading /></Card>;
   if (error) return <Card title="Performance Attribution"><ErrorState message={error} /></Card>;

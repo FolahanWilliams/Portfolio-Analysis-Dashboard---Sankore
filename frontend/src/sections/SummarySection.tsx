@@ -29,8 +29,8 @@ function ContribRow({ c }: { c: Contribution }) {
   );
 }
 
-export function SummarySection({ window }: { window: WindowCode }) {
-  const { data, loading, error } = useApi(() => api.summary(window), [window]);
+export function SummarySection({ window, live = false, refreshTick = 0 }: { window: WindowCode; live?: boolean; refreshTick?: number }) {
+  const { data, loading, error } = useApi(() => api.summary(window, live), [window, live, refreshTick]);
 
   if (loading) return <Card title="Portfolio Summary"><Loading /></Card>;
   if (error) return <Card title="Portfolio Summary"><ErrorState message={error} /></Card>;
