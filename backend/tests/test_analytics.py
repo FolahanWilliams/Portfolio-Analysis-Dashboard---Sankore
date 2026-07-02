@@ -29,8 +29,42 @@ def md():
     return load_market_data()
 
 
-def _w(md, code="1Y"):
+def _w(md, code="ALL"):
     return resolve_window(code, md.dates)
+
+
+def test_sheet_totals_tie_out(md):
+    """The book totals reconcile to the boss's holdings sheet."""
+    w = _w(md)
+    s = compute_summary(md, w)
+    assert s["aum"] == pytest.approx(252_672, abs=3)
+    assert s["cost_basis"] == pytest.approx(259_244, abs=3)
+    assert s["pnl"]["unrealised"] == pytest.approx(-6_572, abs=3)
+    assert s["total_return"] == pytest.approx(-0.0253, abs=2e-4)
+    assert s["holdings_count"] == 32
+
+
+def test_cross_panel_consistency(md):
+    """AUM, cost basis and total return agree across summary / holdings /
+    attribution / exposure."""
+    w = _w(md)
+    s = compute_summary(md, w)
+    h = compute_holdings(md)
+    a = compute_attribution(md, w)
+    e = compute_exposure(md, w)
+
+    assert h["aum"] == pytest.approx(s["aum"], rel=REL)
+    assert sum(x["market_value"] for x in h["holdings"]) == pytest.approx(s["aum"], rel=REL)
+    assert a["total_return"] == pytest.approx(s["total_return"], abs=1e-9)
+    assert sum(x["contribution"] for x in a["security_contribution"]) == pytest.approx(
+        a["total_return"], abs=5e-6)
+    assert sum(r["portfolio"] for r in e["sector"]) == pytest.approx(1.0, rel=REL)
+    assert sum(r["portfolio"] for r in e["region"]) == pytest.approx(1.0, rel=REL)
+    # every holding's attribution contribution == gain$ / total cost
+    hd = {x["ticker"]: x for x in h["holdings"]}
+    tcost = sum(x["cost_value"] for x in h["holdings"])
+    for x in a["security_contribution"]:
+        assert x["contribution"] == pytest.approx(hd[x["ticker"]]["unrealised_pnl"] / tcost, abs=1e-9)
 
 
 def test_data_loads_timeseries(md):
