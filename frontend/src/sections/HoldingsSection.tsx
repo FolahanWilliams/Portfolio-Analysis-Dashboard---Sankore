@@ -92,10 +92,6 @@ export function HoldingsSection({
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-slate-400">
-        “Bought” is the average purchase price from the holdings sheet; “Current” is the latest price
-        {live ? " (live from Yahoo Finance)" : ""}. Change is the gain/loss since purchase. Click a column header to sort.
-      </p>
     </Card>
   );
 }

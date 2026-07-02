@@ -151,7 +151,6 @@ export interface Risk {
   max_drawdown: number;
   var: Record<string, { historical: number; parametric: number }>;
   risk_free_rate: number;
-  correlation: { tickers: string[]; matrix: number[][] };
   benchmark_name: string;
   portfolio_return: number;
   benchmark_return: number;

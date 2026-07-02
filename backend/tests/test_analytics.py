@@ -33,14 +33,21 @@ def _w(md, code="ALL"):
     return resolve_window(code, md.dates)
 
 
-def test_sheet_totals_tie_out(md):
-    """The book totals reconcile to the boss's holdings sheet."""
+def test_cost_basis_ties_to_sheet_and_return_is_live(md):
+    """Cost basis is the sheet's fixed starting point; market value / gain are
+    computed live from Yahoo prices, so they follow the data rather than the
+    sheet's static snapshot."""
     w = _w(md)
     s = compute_summary(md, w)
-    assert s["aum"] == pytest.approx(252_672, abs=3)
+    h = md.holdings.set_index("ticker")
+    px = md.usd_prices.loc[w.end_date]
+    # Cost basis = units x sheet purchase price -> the sheet's $259,244.
     assert s["cost_basis"] == pytest.approx(259_244, abs=3)
-    assert s["pnl"]["unrealised"] == pytest.approx(-6_572, abs=3)
-    assert s["total_return"] == pytest.approx(-0.0253, abs=2e-4)
+    # AUM = units x live Yahoo price; gain and return follow from that.
+    live_aum = float((h["shares"] * px.reindex(h.index)).sum())
+    assert s["aum"] == pytest.approx(live_aum, rel=REL)
+    assert s["pnl"]["unrealised"] == pytest.approx(s["aum"] - s["cost_basis"], abs=2)
+    assert s["total_return"] == pytest.approx((s["aum"] - s["cost_basis"]) / s["cost_basis"], rel=REL)
     assert s["holdings_count"] == 32
 
 

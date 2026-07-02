@@ -92,7 +92,7 @@ export function ExposureSection({ window, live = false, refreshTick = 0 }: { win
         />
       </div>
 
-      {/* By-sector breakdown on the left; sector x region map beside it on the right */}
+      {/* Sector (left) and region (right) side by side -- fills the width evenly */}
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
           <h3 className="text-sm font-semibold text-navy">By sector</h3>
@@ -101,26 +101,26 @@ export function ExposureSection({ window, live = false, refreshTick = 0 }: { win
           <div className="mt-3"><WeightTable rows={data.sector} keyField="sector" /></div>
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-navy">Sector × region map</h3>
-          <p className="mb-2 text-xs text-slate-400">
-            % of the portfolio in each sector/region — darker means more money there.
-          </p>
-          <Matrix
-            rowHeader="Sector"
-            rowLabels={data.heatmap.sectors}
-            colLabels={data.heatmap.regions}
-            values={data.heatmap.values}
-            color={(v) => heatBlue(v, maxW)}
-            format={(v) => (v > 0 ? fmtPct(v, 1) : "·")}
-          />
+          <h3 className="text-sm font-semibold text-navy">By region</h3>
+          <p className="mb-2 text-xs text-slate-400">Geographic split of the portfolio.</p>
+          <WeightChart rows={data.region} keyField="region" />
+          <div className="mt-3"><WeightTable rows={data.region} keyField="region" /></div>
         </div>
       </div>
 
-      <div className="mt-8 lg:w-1/2 lg:pr-4">
-        <h3 className="text-sm font-semibold text-navy">By region</h3>
-        <p className="mb-2 text-xs text-slate-400">Geographic split of the portfolio.</p>
-        <WeightChart rows={data.region} keyField="region" />
-        <div className="mt-3"><WeightTable rows={data.region} keyField="region" /></div>
+      <div className="mt-8">
+        <h3 className="text-sm font-semibold text-navy">Sector × region map</h3>
+        <p className="mb-2 text-xs text-slate-400">
+          % of the portfolio in each sector/region combination — darker means more money there.
+        </p>
+        <Matrix
+          rowHeader="Sector"
+          rowLabels={data.heatmap.sectors}
+          colLabels={data.heatmap.regions}
+          values={data.heatmap.values}
+          color={(v) => heatBlue(v, maxW)}
+          format={(v) => (v > 0 ? fmtPct(v, 1) : "·")}
+        />
       </div>
     </Card>
   );

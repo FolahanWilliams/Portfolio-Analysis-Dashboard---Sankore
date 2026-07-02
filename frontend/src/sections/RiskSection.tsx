@@ -2,14 +2,7 @@ import { api } from "../api/client";
 import { useApi } from "../lib/useApi";
 import type { Risk, SnapshotRisk, WindowCode } from "../types/api";
 import { Card, EmptyState, ErrorState, Loading, Pill, StatTile, TruncatedNote } from "../components/ui";
-import { Matrix } from "../components/Matrix";
 import { fmtMoney, fmtNum, fmtPct, fmtSignedPct, signClass } from "../lib/format";
-
-function corrColor(v: number): string {
-  // -1 (red) .. 0 (white) .. 1 (blue)
-  if (v >= 0) return `hsl(217, 72%, ${97 - v * 52}%)`;
-  return `hsl(2, 62%, ${97 - -v * 46}%)`;
-}
 
 function SnapshotRiskView({ data }: { data: SnapshotRisk }) {
   return (
@@ -133,46 +126,34 @@ export function RiskSection({ window, live = false, refreshTick = 0 }: { window:
         book’s gain since the positions were actually purchased (the “Return since purchase” in Portfolio Summary).
       </p>
 
-      <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div>
-          <h3 className="mb-2 text-xs font-semibold text-slate-500">Value at Risk (1-day)</h3>
+      <div className="mt-5">
+        <h3 className="mb-2 text-xs font-semibold text-slate-500">Value at Risk (1-day)</h3>
+        <div className="overflow-hidden rounded-lg ring-1 ring-slate-100">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="bg-slate-50/80">
               <tr className="text-[11px] uppercase tracking-wide text-slate-400">
-                <th className="py-1 text-left font-medium">Confidence</th>
-                <th className="py-1 text-right font-medium">Historical</th>
-                <th className="py-1 text-right font-medium">Parametric</th>
+                <th className="px-3 py-2 text-left font-medium">Confidence</th>
+                <th className="px-3 py-2 text-right font-medium">Historical</th>
+                <th className="px-3 py-2 text-right font-medium">Parametric</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-t border-slate-50">
-                <td className="py-2 font-medium text-slate-700">95%</td>
-                <td className="py-2 text-right tabular text-negative">{fmtPct(var95.historical, 2)}</td>
-                <td className="py-2 text-right tabular text-negative">{fmtPct(var95.parametric, 2)}</td>
+                <td className="px-3 py-2 font-medium text-slate-700">95%</td>
+                <td className="px-3 py-2 text-right tabular text-negative">{fmtPct(var95.historical, 2)}</td>
+                <td className="px-3 py-2 text-right tabular text-negative">{fmtPct(var95.parametric, 2)}</td>
               </tr>
               <tr className="border-t border-slate-50">
-                <td className="py-2 font-medium text-slate-700">99%</td>
-                <td className="py-2 text-right tabular text-negative">{fmtPct(var99.historical, 2)}</td>
-                <td className="py-2 text-right tabular text-negative">{fmtPct(var99.parametric, 2)}</td>
+                <td className="px-3 py-2 font-medium text-slate-700">99%</td>
+                <td className="px-3 py-2 text-right tabular text-negative">{fmtPct(var99.historical, 2)}</td>
+                <td className="px-3 py-2 text-right tabular text-negative">{fmtPct(var99.parametric, 2)}</td>
               </tr>
             </tbody>
           </table>
-          <p className="mt-2 text-[11px] text-slate-400">
-            VaR shown as the potential 1-day loss; e.g. 95% historical means losses exceed this on ~1 day in 20.
-          </p>
         </div>
-
-        <div>
-          <h3 className="mb-2 text-xs font-semibold text-slate-500">Holdings correlation</h3>
-          <Matrix
-            rowLabels={d.correlation.tickers}
-            colLabels={d.correlation.tickers}
-            values={d.correlation.matrix}
-            color={corrColor}
-            format={(v) => v.toFixed(2)}
-            cellSize={34}
-          />
-        </div>
+        <p className="mt-2 text-[11px] text-slate-400">
+          VaR is the potential 1-day loss; e.g. 95% historical means losses exceed this on ~1 day in 20.
+        </p>
       </div>
     </Card>
   );

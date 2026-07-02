@@ -66,8 +66,8 @@ export function SummarySection({ window, live = false, refreshTick = 0 }: { wind
       </div>
 
       <p className="mt-3 text-[11px] text-slate-400">
-        AUM is the equity market value from the holdings sheet ($252,672); weights shown are % of equity.
-        No separate cash line is included — the sheet's total-fund “% Weight” column was internally inconsistent, so it is not used.
+        Cost basis and share counts come from the holdings sheet; market value uses live prices from Yahoo Finance,
+        so return since purchase updates with the market. Weights are % of equity — no separate cash line is included.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">

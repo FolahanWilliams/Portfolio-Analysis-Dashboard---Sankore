@@ -77,16 +77,6 @@ def compute_risk(md: MarketData, w: WindowSlice) -> dict:
         var = {"95": {"historical": 0.0, "parametric": 0.0},
                "99": {"historical": 0.0, "parametric": 0.0}}
 
-    # Correlation matrix across held tickers (USD daily returns in window).
-    held = [t for t in md.held_tickers() if t in md.usd_prices.columns]
-    rets = md.usd_prices[held].pct_change().iloc[1:]
-    rets = returns_in_window(rets, w)
-    corr = rets.corr()
-    correlation = {
-        "tickers": list(corr.columns),
-        "matrix": [[round(float(v), 4) for v in row] for row in corr.to_numpy()],
-    }
-
     pv_window = pv[(pv.index >= w.base_date) & (pv.index <= w.end_date)]
 
     return {
@@ -101,7 +91,6 @@ def compute_risk(md: MarketData, w: WindowSlice) -> dict:
         "max_drawdown": _max_drawdown(pv_window),
         "var": var,
         "risk_free_rate": RISK_FREE_RATE,
-        "correlation": correlation,
         "benchmark_name": "S&P 500",
         "portfolio_return": port_cum,
         "benchmark_return": bench_cum,
