@@ -9,6 +9,7 @@ import { RiskSection } from "./sections/RiskSection";
 import { AttributionSection } from "./sections/AttributionSection";
 import { AlertsSection } from "./sections/AlertsSection";
 import { ScenarioSection } from "./sections/ScenarioSection";
+import { ChatWidget } from "./components/ChatWidget";
 import { ErrorState } from "./components/ui";
 
 export default function App() {
@@ -99,6 +100,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <ChatWidget />
     </Shell>
   );
 }

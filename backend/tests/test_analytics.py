@@ -167,6 +167,25 @@ def test_risk_benchmark_is_sp500(md):
     assert out["alpha"] is not None and out["beta"] is not None
 
 
+def test_chat_context_is_grounded_and_formatted(md):
+    """The AI context pack is built from the same audited analytics, with numbers
+    pre-formatted so the model never does arithmetic."""
+    from app.ai.chat import build_context, answer
+    ctx = build_context(md)
+    # Cost basis ties to the sheet; percentages are pre-formatted strings.
+    assert ctx["portfolio_summary"]["cost_basis"] == "$259,244"
+    assert ctx["portfolio_summary"]["return_since_purchase"].endswith("%")
+    assert len(ctx["holdings"]) == 32
+    assert ctx["benchmark"] == "S&P 500"
+    # Superlatives are pre-computed (no model sorting needed).
+    assert "at" in ctx["key_facts"]["largest_position"]
+    # Without a key, the endpoint degrades gracefully rather than erroring.
+    import os
+    if not os.environ.get("GEMINI_API_KEY"):
+        r = answer("How are we doing?")
+        assert r["configured"] is False and r["grounded_as_of"] == ctx["as_of"]
+
+
 def test_all_windows_resolve(md):
     for code in ("MTD", "QTD", "YTD", "1Y", "ALL"):
         w = resolve_window(code, md.dates)

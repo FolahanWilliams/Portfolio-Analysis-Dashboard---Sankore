@@ -1,6 +1,8 @@
 import type {
   AlertFeed,
   Attribution,
+  ChatMessage,
+  ChatResponse,
   Exposure,
   HoldingFeed,
   Meta,
@@ -50,6 +52,15 @@ export const api = {
   attribution: (w: WindowCode, live = false) =>
     get<Attribution | SnapshotAttribution>("/attribution", w, live),
   alerts: (w: WindowCode, live = false) => get<AlertFeed>("/alerts", w, live),
+  chat: async (question: string, history: ChatMessage[] = []): Promise<ChatResponse> => {
+    const res = await fetch(`${BASE}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, history }),
+    });
+    if (!res.ok) throw new ApiError(res.status, `Chat request failed (${res.status})`);
+    return (await res.json()) as ChatResponse;
+  },
   scenario: async (req: ScenarioRequest, live = false): Promise<Scenario> => {
     const res = await fetch(`${BASE}/scenario${live ? "?live=1" : ""}`, {
       method: "POST",

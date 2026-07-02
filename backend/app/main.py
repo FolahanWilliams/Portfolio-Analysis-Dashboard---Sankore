@@ -60,6 +60,16 @@ class ScenarioRequest(BaseModel):
     fx_shocks: dict[str, float] = Field(default_factory=dict)
 
 
+class ChatMessage(BaseModel):
+    role: str = "user"
+    text: str = ""
+
+
+class ChatRequest(BaseModel):
+    question: str
+    history: list[ChatMessage] = Field(default_factory=list)
+
+
 def _sanitize(obj):
     """Recursively replace NaN/Inf with None so the JSON is strictly valid."""
     if isinstance(obj, dict):
@@ -212,6 +222,16 @@ def alerts(
     else:
         out = compute_alerts(md, w)
     return _respond(out, md, info)
+
+
+@app.post("/chat")
+def chat(req: ChatRequest):
+    from app.ai.chat import answer
+    q = (req.question or "").strip()
+    if not q:
+        return JSONResponse(status_code=400, content={"error": "empty_question"})
+    hist = [{"role": m.role, "text": m.text} for m in req.history]
+    return JSONResponse(content=answer(q, hist))
 
 
 @app.post("/scenario")

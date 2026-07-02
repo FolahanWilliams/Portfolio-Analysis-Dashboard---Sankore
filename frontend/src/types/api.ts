@@ -9,6 +9,19 @@ export interface DataQuality {
   issues: { source: string; reason: string; detail: string }[];
 }
 
+export interface ChatMessage {
+  role: "user" | "model";
+  text: string;
+}
+
+export interface ChatResponse {
+  answer: string;
+  configured: boolean;
+  model: string;
+  grounded_as_of: string;
+  error?: boolean;
+}
+
 export interface LiveInfo {
   ok: boolean;
   updated: number;
